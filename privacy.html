@@ -54,13 +54,23 @@
 
   <h2>Your phone number and contacts</h2>
   <p>Adding your phone number is optional. If you add it, your phone turns it into a
-  fingerprint (a one-way code) and sends only that; Meep keeps the fingerprint, never the
-  number, only for as long as you keep your number added, and deletes it the moment you
-  remove it or delete your account. A fingerprint of a phone number does not hide it
+  fingerprint (a one-way code), and the fingerprint is what Meep keeps: never the number, only for
+  as long as you keep your number added, and deleted the moment you remove it or delete your
+  account. (Your number itself does pass through Meep&rsquo;s server once, to be texted a
+  verification code. See the next paragraph.) A fingerprint of a phone number does not hide it
   completely &mdash; a phone number has too few possible values, so anyone holding Meep&rsquo;s
   data and the formula behind the fingerprint could work a number out by trying every one.
   This protects your number against casual disclosure, not against someone determined to
   reverse it.</p>
+  <p>To add your number you have to prove you can read a text sent to it. Meep asks Twilio, a
+  text-message company, to send you a six-digit code, and stores your number&rsquo;s fingerprint
+  only once you type that code back. Your number reaches Meep&rsquo;s server for exactly as long as
+  it takes to hand it to Twilio: it is never written to Meep&rsquo;s database and never written to a
+  log. Meep never sees the code at all. Twilio creates it, sends it and checks it, so there is no
+  code stored anywhere in Meep either. Twilio keeps its own record of the numbers it texted, under
+  its own privacy policy. What Meep writes down about a code is the fingerprint of the number it was
+  sent to, the time, and whether it worked, so that the number of texts Meep pays for stays within a
+  monthly limit.</p>
   <p>Contacts are read only when you tap <strong>Find friends from your contacts</strong>, and
   only the contacts you allow &mdash; iOS can limit this to a handful. Names never leave your
   phone. The numbers are turned into fingerprints on your phone and sent to ask which belong
