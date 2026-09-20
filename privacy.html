@@ -1,9 +1,13 @@
 <!DOCTYPE html>
+<!-- OWNER, BEFORE PUSHING: the Contact section below carries a placeholder for the address that
+     replaces the GitHub issues link (the Meep repo is private, so that link is a 404 for every
+     player). Fill it in first: decision 207 in ROADMAP.md. Rewritten 20 Sep 2026 against the server
+     as built; the findings log is docs/notes/RISK-ASSESSMENT-FINDINGS-2026-09-20.md in the Meep repo. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Meep — Privacy Policy</title>
+<title>Meep · Privacy Policy</title>
 <style>
   :root { color-scheme: light dark; }
   body { font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -16,109 +20,240 @@
   a { color: #2a6fd8; }
   ul { padding-left: 20px; }
   li { margin: 6px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 8px 6px 0; border-bottom: 1px solid #ccc4; }
+  mark { background: #ffe97a; color: #1a1a1a; padding: 0 3px; }
 </style>
 </head>
 <body>
   <h1>Privacy Policy</h1>
-  <p class="eff">Meep &middot; Effective September 3, 2026</p>
+  <p class="eff">Meep &middot; Effective September 20, 2026</p>
 
-  <p class="lead"><strong>Meep does not track you, and shares nothing with anybody.</strong>
-  There is no advertising, no analytics service, and no third-party SDK in the app.
-  What it stores is what two people need in order to play the same board and compare
-  scores honestly.</p>
+  <p class="lead"><strong>Meep does not track you across other companies&rsquo; apps or
+  websites.</strong> There is no advertising, no analytics service and no third-party SDK in the
+  app. Meep does use three service providers to run: Railway hosts the app and its database in the
+  United States, Twilio sends and checks phone verification texts, and Apple provides Sign in with
+  Apple, device attestation, push notifications and the App Store. What Meep stores is your account,
+  the rounds you play, the people you play with, the notifications you have allowed, and a small
+  record of which parts of the app you use. This page says exactly what that means.</p>
+
+  <p>Meep is made and run by David Jabech, an individual in the United States. Meep is offered on the
+  App Store in the United States and Canada.</p>
 
   <h2>Your account</h2>
-  <p>On first launch your device generates a random 32-byte secret and keeps it in the
-  iOS Keychain. The server stores only its SHA-256, so a copy of the database is not a
-  list of ways to sign in as its own rows. You are never asked to create an account and
-  never shown a login screen.</p>
+  <p>On first launch your device generates a random 32-byte secret and keeps it in the iOS
+  Keychain. The server stores only its SHA-256, so a copy of the database is not a list of ways to
+  sign in as its own rows. You are never asked to create an account and never shown a login
+  screen.</p>
+  <p>Along with the account, the server keeps: your sessions (a hashed sign-in token, which
+  expires 60 days after it was last refreshed); a record of each install that has signed in (the
+  platform and the app build); and the device attestation Apple issues for that install (a key
+  identifier, its public key and Apple&rsquo;s receipt), which is how the server knows a request came
+  from a real copy of Meep on a real iPhone. All of it is destroyed when you delete your account.</p>
 
   <h2>Sign in with Apple</h2>
-  <p>Optional, and only if you choose it. Meep receives the identifier Apple issues for
-  this app and nothing else &mdash; it does not request your name or your email address.
-  It exists so an account can survive a new phone.</p>
+  <p>Optional, and only if you choose it. Meep receives the identifier Apple issues for this app
+  and nothing else: it does not request your name or your email address. The identifier is stored
+  as Apple sent it, attached to your account, so that the account can survive a new phone.</p>
 
   <h2>Your handle</h2>
   <p>Every player has one. Meep deals you a generated handle (something like
   <em>@swiftotter</em>) when your account is created, and you can change it any time in
   Settings. It is public and searchable by design: a handle is how someone finds you to
-  send a board.</p>
+  send a board. A handle is checked against a word list when you set it, and existing handles are
+  checked again when that list changes; a handle that fails is replaced with a placeholder and you
+  are told.</p>
 
   <h2>Your photo</h2>
-  <p>Optional. If you set one, it is chosen through the system photo picker &mdash; Meep
-  never asks for access to your photo library &mdash; resized on your device, stored with
-  your account, and shown to other players next to your handle. You can change or remove
-  it any time from your profile, and deleting your account deletes it. If you never set
-  one, Meep shows a colored circle with your initials instead, and no photo exists
-  anywhere.</p>
+  <p>Optional. If you set one, it is chosen through the system photo picker (Meep never asks for
+  access to your photo library), resized on your device, stored with your account as a JPEG of at
+  most 256 KB, and shown to your friends and to the people you play next to your handle. People you
+  are matched with as strangers see a tile with your initials instead, never the photo. You can
+  change or remove it any time from your profile, and deleting your account deletes it. If you never
+  set one, Meep shows a colored circle with your initials, and no photo exists anywhere. A photo that
+  is reported can be removed by the person who reviews reports.</p>
+
+  <h2>What other players can see</h2>
+  <ul>
+    <li><strong>Anyone who looks you up</strong> sees your handle, your photo or initials, the
+    achievement badge you have chosen to wear, your rating, how many games you have played, and when
+    you joined.</li>
+    <li><strong>Your friends</strong> also see your day streak, your record against them, your
+    score on the shared daily board, your rarest and longest word from recent rounds, and where you
+    have reached on the day&rsquo;s expedition. Your friends can see your friend list (handles,
+    faces and worn badges, nothing more); nobody else can.</li>
+    <li><strong>A stranger you are matched with</strong> sees your handle and your initials, never
+    your photo, and is not made your friend afterwards.</li>
+    <li><strong>Anyone with a link you share.</strong> A board link or a friend-code link opens a
+    public web page that shows your handle, and for an open board your score, to whoever has the
+    link.</li>
+  </ul>
 
   <h2>Your phone number and contacts</h2>
   <p>Adding your phone number is optional. If you add it, your phone turns it into a
   fingerprint (a one-way code), and the fingerprint is what Meep keeps: never the number, only for
   as long as you keep your number added, and deleted the moment you remove it or delete your
-  account. (Your number itself does pass through Meep&rsquo;s server once, to be texted a
-  verification code. See the next paragraph.) A fingerprint of a phone number does not hide it
-  completely &mdash; a phone number has too few possible values, so anyone holding Meep&rsquo;s
-  data and the formula behind the fingerprint could work a number out by trying every one.
-  This protects your number against casual disclosure, not against someone determined to
-  reverse it.</p>
-  <p>To add your number you have to prove you can read a text sent to it. Meep asks Twilio, a
-  text-message company, to send you a six-digit code, and stores your number&rsquo;s fingerprint
-  only once you type that code back. Your number reaches Meep&rsquo;s server for exactly as long as
-  it takes to hand it to Twilio: it is never written to Meep&rsquo;s database and never written to a
-  log. Meep never sees the code at all. Twilio creates it, sends it and checks it, so there is no
-  code stored anywhere in Meep either. Twilio keeps its own record of the numbers it texted, under
-  its own privacy policy. What Meep writes down about a code is the fingerprint of the number it was
-  sent to, the time, and whether it worked, so that the number of texts Meep pays for stays within a
-  monthly limit.</p>
+  account. A fingerprint of a phone number does not hide it completely: a phone number has too few
+  possible values, so anyone holding Meep&rsquo;s data and the formula behind the fingerprint could
+  work a number out by trying every one. This protects your number against casual disclosure, not
+  against someone determined to reverse it.</p>
+  <p>To add your number you have to prove you can read a text sent to it. Your number reaches
+  Meep&rsquo;s server once, for exactly as long as it takes to hand it to Twilio, a text-message
+  company, which creates a six-digit code, sends it, and decides whether the code you type is right.
+  The code you type also passes through Meep&rsquo;s server on its way to Twilio. Neither the number
+  nor the code is ever written to Meep&rsquo;s database or to a log. What Meep writes down about an
+  attempt is the fingerprint of the number, Twilio&rsquo;s reference for the attempt, when it
+  started, how many codes were tried against it and whether it worked, and those rows are deleted
+  after two days. Twilio keeps its own record of the numbers it texted, under its own privacy
+  policy. Texts are limited per player, per number and across everyone, so the feature can pause
+  for a month if the limit is reached.</p>
   <p>Contacts are read only when you tap <strong>Find friends from your contacts</strong>, and
-  only the contacts you allow &mdash; iOS can limit this to a handful. Names never leave your
+  only the contacts you allow (iOS can limit this to a handful). Names never leave your
   phone. The numbers are turned into fingerprints on your phone and sent to ask which belong
   to Meep players who also added their own number; the answer is what you see on screen. Meep
-  keeps none of it: no contact of yours is stored, and nothing records who you know. The one
-  thing written down is a running total of how many numbers your account has looked up today
-  &mdash; a total only, with no numbers and no names in it &mdash; which is how Meep holds this
-  to at most 4,000 numbers a day per account. That total is deleted after two days. Nothing
-  about your contacts reaches another player unless you tap Invite or Challenge.</p>
+  keeps no contact of yours. Two things are written down for the day: how many numbers your account
+  sent, and a small summary (about two kilobytes) that estimates how many different ones they were,
+  so that re-checking the same address book does not count against you twice. The summary holds no
+  numbers and no names and cannot be turned back into either, but it is more than a plain count.
+  Both are deleted after two days, and Meep holds lookups to at most 4,000 different numbers a day
+  per account. Nothing about your contacts reaches another player unless you tap Invite or
+  Challenge.</p>
+  <p>Separately from contacts matching, Meep stores the friendships you make, the friend requests
+  you send and receive (an unanswered request lapses after 30 days), your friend code, and anyone
+  you block.</p>
   <p>Inviting a contact who is not on Meep opens your phone&rsquo;s own Messages app with a
-  link already typed in. You send it &mdash; Meep does not, and never sends a text on your
-  behalf.</p>
+  link already typed in. You send it; Meep does not, and never sends a text on your behalf.</p>
   <p>You can remove your number at any time from the You tab&rsquo;s Friends card:
   <strong>Your number &rarr; Remove</strong>. From that moment you can no longer be found by
   it.</p>
   <p>Meep has no way to tell you whether a number you add already belongs to another player:
   if somebody else added that number first, their having it does not make you findable.</p>
 
-  <h2>Rounds you play against other people</h2>
-  <p>Meep stores the score and a log of the words and timings, which the server replays
-  to check that a claimed score is one the board could actually produce. This is what
-  makes a competitive result mean anything. Rounds you play on your own stay on your
-  device.</p>
+  <h2>The rounds you play</h2>
+  <p>Every round you finish is stored on Meep&rsquo;s server, whichever mode it was: the board, the
+  words you found with the path you traced for each, how long the round took, and a move-by-move
+  log. This is what lets a new phone get your history, your word collection and your achievements
+  back, and it is kept for as long as your account exists. Practice rounds are stored the same way
+  today; a change is planned so that they stay on the phone and only the words you found are kept.</p>
+  <p>For a round you play against other people, the server keeps its own copy as well (the score,
+  the words, the log and a few measurements used to spot cheating) and replays the log against the
+  board to check that a claimed score is one the board could actually produce. This is what makes
+  a competitive result mean anything. The server&rsquo;s copy of the move-by-move log and the
+  measurements are deleted after 90 days; the score and the words stay.</p>
 
-  <h2>Reports</h2>
-  <p>If you report someone, Meep stores the reason and any note you write, so that a
-  person can read it.</p>
+  <h2>Challenges, parties and strangers</h2>
+  <p>A board you send or accept is stored with who was invited, who played and the result, and it
+  stays in both players&rsquo; history. When you ask for a random opponent, Meep keeps a request
+  (the preset you asked for, your rating at the time, and when) for up to seven days, until it is
+  paired or lapses. Your rating is stored on your account, and each rated board writes a receipt of
+  how it moved your rating and your opponent&rsquo;s.</p>
+
+  <h2>Achievements</h2>
+  <p>The achievements you earn are counted on your account: how many, the three most recent, and
+  the one you wear beside your name. Other players see the badge you wear.</p>
+
+  <h2>Which parts of the app you use</h2>
+  <p>Meep records a fixed list of 22 things you do in the app, such as opening the leaderboard,
+  finishing the daily board or asking for a random opponent, each with a small set of fixed labels
+  and never any typed text, tied to your account. The developer reads them as a weekly summary to
+  see which features get used. They are kept for 90 days and deleted with your account. There is no
+  switch to turn this off today.</p>
+
+  <h2>Notifications</h2>
+  <p>If you allow notifications, Meep stores the token Apple issues for your device, along with
+  the build it came from, your locale, and which kinds of notification you have switched on. A token
+  Apple reports as dead is dropped after 30 days; all of them are destroyed with your account. You
+  can turn notifications off in iOS Settings at any time and the game works without them.</p>
+
+  <h2>Reports, blocks and moderation</h2>
+  <p>If you report someone, Meep stores who you reported, the board it was about, the reason you
+  picked, any note you write (up to 1,000 characters), when, and what was done about it, so that a
+  person can read it. A person does: reports go to a queue the developer reads, and the possible
+  actions are a warning, a replacement handle, a suspension for a number of days (during which the
+  player cannot sign in and is told the date it ends), removal of a photo, or closing the report.
+  Every action is logged with who took it, when and why. Reports and those logs are kept.</p>
+  <p>Blocking someone hides you from each other in Meep: neither of you can find, invite, match with
+  or see the other, and it ends any board between you that nobody has played yet. A board you had
+  both already accepted keeps running to its result. The person you block is not told.</p>
+
+  <h2>The subscription</h2>
+  <p>Meep Premium is bought through the App Store. Apple handles the payment; Meep never receives
+  your card or any payment detail, and keeps no record of the purchase on its server. Whether you
+  are subscribed is read on your phone from the App Store. Deleting the app or deleting your Meep
+  account does not cancel a subscription: cancel it in your Apple subscription settings.</p>
 
   <h2>Network address</h2>
-  <p>Your address is used briefly to apply rate limits and handle abuse. It is not used
-  to build a profile and is not joined to anything else.</p>
+  <p>Your address is used in memory to apply rate limits and is forgotten a minute later or when
+  the server restarts; no table stores it and it is not joined to your account. If a request is
+  refused for exceeding a limit, the address appears in the server&rsquo;s log line for that
+  refusal. Railway, which hosts Meep, keeps its own request logs under its own terms.</p>
+
+  <h2>Who receives information</h2>
+  <ul>
+    <li><strong>Railway</strong> hosts the app and the database, in the United States.</li>
+    <li><strong>Twilio</strong> receives your phone number and the code you type, only for
+    verification, as described above.</li>
+    <li><strong>Apple</strong> provides Sign in with Apple, device attestation, push notifications
+    and the App Store, each under Apple&rsquo;s own terms.</li>
+    <li><strong>Other players</strong> receive what the section above lists, and the public link
+    pages show your handle to anyone holding a link you shared.</li>
+    <li>Meep would disclose information if the law required it, or to deal with serious abuse or
+    protect someone&rsquo;s safety. Nothing is sold, and nothing is given to anyone for advertising.</li>
+  </ul>
+
+  <h2>How long Meep keeps things</h2>
+  <table>
+    <tr><th>What</th><th>How long</th></tr>
+    <tr><td>Your account, handle, photo, phone fingerprint, friendships, blocks, rating, achievements</td><td>Until you delete the account (or remove the item)</td></tr>
+    <tr><td>Your round history</td><td>Until you delete the account</td></tr>
+    <tr><td>The server&rsquo;s own copy of a competitive round&rsquo;s move log and cheating measurements</td><td>90 days</td></tr>
+    <tr><td>The record of which parts of the app you use</td><td>90 days</td></tr>
+    <tr><td>Sessions</td><td>60 days after the last refresh</td></tr>
+    <tr><td>Phone verification attempts, and the day&rsquo;s contacts count and summary</td><td>2 days</td></tr>
+    <tr><td>A request for a random opponent</td><td>7 days, then marked lapsed</td></tr>
+    <tr><td>Dead notification tokens</td><td>30 days</td></tr>
+    <tr><td>Finished boards, reports and moderation logs</td><td>Not yet deleted on a schedule</td></tr>
+  </table>
+  <p>The last row is honest rather than final: finished boards, reports and moderation records are
+  kept today, and a schedule for them is being decided.</p>
 
   <h2>Deleting your account</h2>
-  <p>In the app: <strong>Settings &rarr; Delete account</strong>. It destroys every
-  credential, session and device record, so nothing can sign in as you again, clears
-  your handle and display name, deletes your photo, and forgets the fingerprint of your
-  phone number if you had added one.</p>
-  <p>One thing deliberately survives. Games you have already finished stay in your
-  opponents&rsquo; history, without your name on them &mdash; a completed challenge is
-  two people&rsquo;s record, and the other player&rsquo;s result is not ours to delete.
-  Reports are kept for the same reason.</p>
+  <p>In the app: <strong>Settings &rarr; Delete account</strong>. In one step it destroys every
+  credential, session, install record and device attestation, so nothing can sign in as you again;
+  deletes your photo, your whole round history, your friendships, friend requests, friend code,
+  blocks, your rating and its receipts, your notification tokens, your phone fingerprint and
+  verification attempts, the contacts counters and the record of which features you used; and clears
+  your handle, which someone else may later take. If you cannot sign in, write to the address below
+  and we will do it for you after confirming the account is yours.</p>
+  <p>Some things deliberately survive. Games you have already finished stay in your
+  opponents&rsquo; history, with their scores and move logs, under an account record with no name on
+  it: a completed challenge is two people&rsquo;s record, and the other player&rsquo;s result is
+  not ours to delete. Your opponents&rsquo; rating receipts still refer to that nameless record.
+  Reports you made and reports about you are kept with their notes, and so are any moderation
+  actions, because evidence that vanishes when someone leaves is not evidence. The nameless record
+  also keeps the dates it was created and last seen and its achievement counts. None of this carries
+  your name, but it is still about you, so this policy still covers it.</p>
+
+  <h2>Your choices and your rights</h2>
+  <p>You can ask to see what Meep holds about you, to correct it, to receive a copy, or to have it
+  deleted, by writing to the address below; we answer within the time the law where you live
+  allows. Meep runs on servers in the United States, so your information is processed there
+  wherever you are. If you are unhappy with an answer you can complain to the privacy regulator
+  where you live.</p>
 
   <h2>Children</h2>
-  <p>Meep is not directed at children under 13 and does not knowingly collect their data.</p>
+  <p>Meep is not directed at children under 13 and does not knowingly collect their data. If you
+  believe a child under 13 has an account, write to the address below and it will be deleted.</p>
+
+  <h2>Changes</h2>
+  <p>When this page changes, the date at the top changes with it, and a change that matters is
+  announced in the app.</p>
 
   <h2>Contact</h2>
-  <p>Questions, or a request about your data:
-  <a href="https://github.com/DaveJabe/Meep/issues">github.com/DaveJabe/Meep/issues</a>.</p>
+  <p>Questions, a request about your data, a report you cannot make in the app, or an urgent safety
+  concern: <mark>[the owner fills in a monitored address here before this page is published;
+  decision 207]</mark>. Please do not put phone numbers, account secrets or other people&rsquo;s
+  details anywhere public.</p>
 
   <p style="margin-top:40px"><a href="./">&larr; Meep</a></p>
 </body>
