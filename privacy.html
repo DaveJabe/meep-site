@@ -27,7 +27,7 @@
 </head>
 <body>
   <h1>Privacy Policy</h1>
-  <p class="eff">Meep &middot; Effective September 20, 2026</p>
+  <p class="eff">Meep &middot; Effective October 31, 2026</p>
 
   <p class="lead"><strong>Meep does not track you across other companies&rsquo; apps or
   websites.</strong> There is no advertising, no analytics service and no third-party SDK in the
@@ -184,9 +184,12 @@
 
   <h2>Network address</h2>
   <p>Your address is used in memory to apply rate limits and is forgotten a minute later or when
-  the server restarts; no table stores it and it is not joined to your account. If a request is
-  refused for exceeding a limit, the address appears in the server&rsquo;s log line for that
-  refusal. Railway, which hosts Meep, keeps its own request logs under its own terms.</p>
+  the server restarts. One count is kept for longer: so that one network cannot make accounts by
+  the hundred, Meep counts how many new accounts were made from each network each day. That count
+  is stored under a fingerprint of the address made with a secret key, never the address itself,
+  is not joined to any account, and is deleted after two days. If a request is refused for
+  exceeding a limit, the address appears in the server&rsquo;s log line for that refusal. Railway,
+  which hosts Meep, keeps its own request logs under its own terms.</p>
 
   <h2>Who receives information</h2>
   <ul>
