@@ -1,50 +1,841 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Meep</title>
-
-<meta property="og:type" content="website">
-<meta property="og:title" content="Meep">
-<meta property="og:description" content="A word game you can play against someone who is not in the room.">
-<meta property="og:url" content="https://davejabe.github.io/meep-site/">
-<meta property="og:image" content="https://davejabe.github.io/meep-site/icon-1024.png">
-<meta property="og:image:width" content="1024">
-<meta property="og:image:height" content="1024">
-
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Meep">
-<meta name="twitter:description" content="A word game you can play against someone who is not in the room.">
-<meta name="twitter:image" content="https://davejabe.github.io/meep-site/icon-1024.png">
-
-<link rel="apple-touch-icon" href="icon-1024.png">
+<meta name="description" content="A word game for iPhone. Trace words on a letter grid before the clock runs out. Coming to iPhone in January 2027.">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
-  :root { color-scheme: light dark; }
-  body { font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-         max-width: 680px; margin: 0 auto; padding: 48px 22px 80px; color: #1a1a1a; }
-  @media (prefers-color-scheme: dark) { body { background: #111; color: #e8e8e8; } a { color: #7da8d8; } }
-  h1 { font-size: 30px; margin-bottom: 4px; }
-  h2 { font-size: 19px; margin-top: 34px; }
-  .eff { color: #888; font-size: 14px; margin-bottom: 28px; }
-  .lead { font-size: 17px; }
-  a { color: #2a6fd8; }
-  ul { padding-left: 20px; }
-  li { margin: 6px 0; }
-  .icon { width: 96px; height: 96px; border-radius: 21px; display: block; margin-bottom: 18px; }
+@font-face { font-family: "Nunito"; font-weight: 700; font-display: swap; src: url("fonts/nunito-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 800; font-display: swap; src: url("fonts/nunito-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 900; font-display: swap; src: url("fonts/nunito-latin-900-normal.woff2") format("woff2"); }
+/* Layout: phone-first single column on the cool off-white tabletop; the hero pairs the
+   tile wordmark with a live board, then each section is one rounded keycap card or a row of them.
+   Colours are MeepPalette.swift exactly; dark is the app's own dark table, not an inversion.
+   The physical parts (tiles, the blue key, gold) keep their colour in the dark. */
+:root {
+  /* brand and action */
+  --cobalt: #4E68C8;
+  --cobalt-surface: #E8ECFA;
+  --on-cobalt: #FFFFFF;
+  --key: #5771CC;            /* primary key face, same in both looks */
+  --key-lip: #324487;
+  /* celebrate */
+  --gold: #F3D663;
+  --gold-lip: #A59141;
+  /* words */
+  --plum: #6E5A9E;
+  --on-plum: #FFFFFF;
+  --word: #E9E2F7;
+  --word-strong: #D9CFF0;
+  /* friends */
+  --teal: #477F79;
+  --teal-lip: #2D5450;
+  --on-teal: #FFFFFF;
+  /* accept, warn */
+  --leaf: #2E7D32;
+  --coral: #FF7F65;
+  /* neutrals */
+  --canvas: #F2F5FC;
+  --surface: #FFFFFF;
+  --surface-quiet: #E7EBF3;
+  --ink: #3F3F3F;
+  --ink-muted: #616161;
+  --hairline: #D9D9D9;
+  --tile: #FFFFFF;           /* white tiles, charcoal letters, both looks */
+  --tile-ink: #3F3F3F;
+  --tile-lip: color-mix(in srgb, #FFFFFF 75%, #000);
+  --surface-lip: color-mix(in srgb, var(--surface) 75%, #000);
+  --scrim: color-mix(in srgb, var(--canvas) 70%, transparent);
+
+  /* type */
+  --font-game: "Nunito", ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-read: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* radius scale */
+  --r-chip: 8px; --r-control: 14px; --r-card: 18px; --r-keycap: 22px; --r-hero: 26px;
+  /* spacing scale */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
+  --lip: 5px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --cobalt: #8B9FE7; --cobalt-surface: #3F4A6B; --on-cobalt: #22282E;
+    --plum: #AFA4CA; --on-plum: #22282E;
+    --word: #4C4560; --word-strong: #57506F;
+    --teal: #8FBDB7; --teal-lip: #60807B; --on-teal: #22282E;
+    --leaf: #7ECB83; --coral: #FF9984;
+    --canvas: #22282E; --surface: #373D43; --surface-quiet: #4A5058;
+    --ink: #F2F2F2; --ink-muted: #C2C8CE; --hairline: #51575D;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --cobalt: #8B9FE7; --cobalt-surface: #3F4A6B; --on-cobalt: #22282E;
+  --plum: #AFA4CA; --on-plum: #22282E;
+  --word: #4C4560; --word-strong: #57506F;
+  --teal: #8FBDB7; --teal-lip: #60807B; --on-teal: #22282E;
+  --leaf: #7ECB83; --coral: #FF9984;
+  --canvas: #22282E; --surface: #373D43; --surface-quiet: #4A5058;
+  --ink: #F2F2F2; --ink-muted: #C2C8CE; --hairline: #51575D;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { font-size: 100%; -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-read);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+a { color: var(--cobalt); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; border-radius: var(--r-chip); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.wrap {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* --- type voices --- */
+.eyebrow {
+  font-family: var(--font-game);
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0;
+}
+h2, h3 { text-wrap: balance; margin: 0; }
+h2 {
+  font-family: var(--font-game);
+  font-weight: 900;
+  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+h3 { font-family: var(--font-read); font-weight: 600; font-size: 1.25rem; line-height: 1.3; }
+p { margin: 0; }
+.lede { font-size: 1.0625rem; color: var(--ink-muted); max-width: 36em; }
+
+/* --- keycap button: a face on its own darker lip; pressing pushes the face down --- */
+.key {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+  min-height: 44px; padding: 0 var(--s5);
+  font-family: var(--font-game); font-weight: 800; font-size: 1.0625rem;
+  color: #FFFFFF; background: var(--key);
+  border: 0; border-radius: var(--r-control);
+  box-shadow: 0 var(--lip) 0 var(--key-lip);
+  text-decoration: none; cursor: pointer;
+  margin-bottom: var(--lip);
+  transition: transform 90ms ease-out, box-shadow 90ms ease-out;
+}
+.key:hover { filter: brightness(1.05); }
+.key:active { transform: translateY(var(--lip)); box-shadow: 0 0 0 var(--key-lip); }
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  min-height: 44px; padding: 0 var(--s4);
+  border-radius: 999px;
+  background: var(--cobalt-surface); color: var(--ink);
+  font-family: var(--font-game); font-weight: 800; font-size: 1rem;
+}
+.status-pill .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cobalt); }
+
+/* --- cards --- */
+.card {
+  background: var(--surface);
+  border-radius: var(--r-card);
+  box-shadow: 0 4px 0 var(--surface-lip);
+  padding: var(--s5);
+  min-width: 0;
+}
+.keycap {
+  border-radius: var(--r-keycap);
+  box-shadow: 0 6px 0 var(--lip-c);
+  padding: var(--s5);
+  min-width: 0;
+}
+.keycap.gold { background: var(--gold); --lip-c: var(--gold-lip); color: #3F3F3F; }
+.keycap.teal { background: var(--teal); --lip-c: var(--teal-lip); color: var(--on-teal); }
+.keycap.white { background: var(--surface); --lip-c: var(--surface-lip); }
+.keycap .eyebrow { color: inherit; opacity: .8; }
+
+/* --- header --- */
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s3);
+  padding-block: var(--s4);
+}
+.brand-small {
+  font-family: var(--font-game); font-weight: 900; font-size: 1.375rem;
+  color: var(--ink); text-decoration: none;
+  display: inline-flex; align-items: center; gap: var(--s2);
+}
+.brand-small .app-icon { width: 32px; height: 32px; border-radius: 22.5%; display: block; flex: none; }
+.top nav { display: flex; gap: var(--s4); font-size: 0.9375rem; }
+.top nav a { color: var(--ink-muted); text-decoration: none; padding-block: var(--s3); }
+.top nav a:hover { color: var(--cobalt); }
+
+/* --- hero --- */
+.hero {
+  display: grid; gap: 40px;
+  padding-block: var(--s5) 56px;
+  align-items: center;
+}
+@media (min-width: 52rem) { .hero { grid-template-columns: 1.05fr 1fr; gap: 56px; padding-block: 40px 80px; } }
+.hero-copy { display: grid; gap: var(--s5); justify-items: start; min-width: 0; }
+
+.wordmark { margin: 0; display: flex; flex-wrap: wrap; gap: 10px; line-height: 1; }
+.wordmark .t {
+  --size: clamp(3.75rem, 2.6rem + 6vw, 6.25rem);
+  width: var(--size); height: var(--size);
+  border-radius: calc(var(--size) * .26);
+  background: var(--tile); color: var(--tile-ink);
+  box-shadow: 0 6px 0 var(--tile-lip);
+  display: grid; place-items: center;
+  font-family: var(--font-game); font-weight: 900;
+  font-size: calc(var(--size) * .46);
+  margin-bottom: 6px;
+}
+.wordmark .t:nth-child(even) { transform: rotate(2deg); }
+.wordmark .t:nth-child(odd) { transform: rotate(-1.5deg); }
+
+.promise {
+  font-family: var(--font-game); font-weight: 900;
+  font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem);
+  line-height: 1.08; letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.cta-row { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; }
+
+/* --- the live board --- */
+.board-card {
+  background: var(--surface);
+  border-radius: var(--r-hero);
+  box-shadow: 0 6px 0 var(--surface-lip);
+  padding: var(--s4);
+  display: grid; gap: var(--s4);
+  width: 100%; max-width: 26rem; justify-self: center;
+  position: relative;
+  min-width: 0;
+}
+.hud { display: flex; justify-content: space-between; align-items: center; padding: 0 var(--s1); }
+.hud .label { font-family: var(--font-game); font-weight: 800; font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+.hud .num { font-family: var(--font-game); font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; }
+.timer { font-size: 1.75rem; display: inline-block; }
+.timer.breathe { animation: breathe 1s ease-in-out infinite; color: var(--coral); }
+.score-wrap { text-align: right; position: relative; }
+.score { font-size: 1.375rem; display: inline-block; color: var(--cobalt); }
+.score.bump { animation: bump 260ms ease-out; }
+.float-pts {
+  position: absolute; right: 0; top: -4px;
+  font-family: var(--font-game); font-weight: 900; color: var(--leaf);
+  pointer-events: none; animation: floatUp 800ms ease-out forwards;
+}
+
+.board {
+  position: relative;
+  background: var(--surface-quiet);
+  border-radius: var(--r-keycap);
+  padding: var(--s4);
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+.tile {
+  aspect-ratio: 1; max-width: 100%;
+  border-radius: 26%;
+  background: var(--tile); color: var(--tile-ink);
+  box-shadow: 0 4px 0 var(--tile-lip);
+  display: grid; place-items: center;
+  font-family: var(--font-game); font-weight: 900;
+  font-size: clamp(1.5rem, 7vw, 2.125rem);
+  position: relative; z-index: 1;
+  transition: transform 120ms ease-out, box-shadow 120ms ease-out;
+  user-select: none;
+}
+.tile.on { transform: translateY(-3px) scale(1.03); background: var(--gold); color: #3F3F3F; box-shadow: 0 7px 0 var(--gold-lip); }
+.path-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: visible; }
+.path-svg polyline {
+  fill: none; stroke: var(--gold); stroke-width: 16; stroke-linecap: round; stroke-linejoin: round;
+  opacity: 1;
+  transition: opacity 260ms ease-out;
+}
+.path-svg circle { fill: var(--gold); }
+
+.found { display: flex; flex-wrap: wrap; gap: var(--s2); min-height: 36px; align-content: flex-start; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 32px; padding: 0 var(--s3);
+  border-radius: 999px;
+  background: var(--word); color: var(--ink);
+  font-family: var(--font-game); font-weight: 800; font-size: .9375rem; letter-spacing: .02em;
+}
+.chip .pts { font-variant-numeric: tabular-nums; color: var(--ink-muted); font-weight: 700; }
+.chip.pop { animation: pop 260ms cubic-bezier(.34,1.56,.64,1); }
+.chip.placeholder { background: transparent; box-shadow: inset 0 0 0 2px var(--hairline); color: var(--ink-muted); }
+
+.times-up {
+  position: absolute; inset: 0; z-index: 3;
+  display: grid; place-items: center;
+  background: var(--scrim);
+  border-radius: var(--r-hero);
+  font-family: var(--font-game); font-weight: 900; font-size: 3rem; color: var(--ink);
+}
+.times-up span { animation: pop 220ms cubic-bezier(.34,1.56,.64,1); }
+
+@keyframes pop { 0% { transform: scale(.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes bump { 0%,100% { transform: scale(1); } 50% { transform: scale(1.14); } }
+@keyframes floatUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-26px); opacity: 0; } }
+@keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+
+/* --- sections --- */
+section.block { padding-block: 56px; display: grid; gap: var(--s5); }
+@media (min-width: 52rem) { section.block { padding-block: 72px; } }
+.head { display: grid; gap: var(--s3); max-width: 40rem; }
+.grid2 { display: grid; gap: var(--s5); }
+.grid3 { display: grid; gap: var(--s5); }
+@media (min-width: 44rem) { .grid2 { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 52rem) { .grid3 { grid-template-columns: repeat(3, 1fr); } }
+.stack { display: grid; gap: var(--s3); align-content: start; }
+
+/* how it plays */
+.step .n {
+  width: 44px; height: 44px; border-radius: var(--r-control);
+  background: var(--cobalt-surface); color: var(--cobalt);
+  display: grid; place-items: center;
+  font-family: var(--font-game); font-weight: 900; font-size: 1.25rem;
+}
+.sizes { display: flex; gap: var(--s3); align-items: flex-end; flex-wrap: wrap; }
+.mini-board { display: grid; gap: 3px; padding: 6px; background: var(--surface-quiet); border-radius: 10px; }
+.mini-board i { width: 9px; height: 9px; border-radius: 3px; background: var(--tile); box-shadow: 0 1.5px 0 var(--tile-lip); }
+.mini-board-wrap { display: grid; gap: 4px; justify-items: center; font-family: var(--font-game); font-weight: 800; font-size: .8125rem; color: var(--ink-muted); }
+.ladder { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.ladder .chip:nth-child(1) { font-size: .8125rem; }
+.ladder .chip:nth-child(2) { font-size: .9375rem; }
+.ladder .chip:nth-child(3) { font-size: 1.0625rem; background: var(--word-strong); }
+.ladder .chip:nth-child(4) { font-size: 1.1875rem; background: var(--word-strong); }
+
+/* every day */
+.daily { display: grid; gap: var(--s4); }
+.daily .big { font-family: var(--font-game); font-weight: 900; font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.25rem); line-height: 1.05; }
+.daily-tiles { display: flex; gap: 6px; }
+.daily-tiles span {
+  width: 34px; height: 34px; border-radius: 9px; background: #FFFFFF; color: #3F3F3F;
+  box-shadow: 0 3px 0 var(--gold-lip);
+  display: grid; place-items: center; font-family: var(--font-game); font-weight: 900; font-size: 1rem;
+}
+.stages { display: flex; align-items: center; gap: 0; }
+.stage {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--font-game); font-weight: 900; font-size: 1rem;
+  background: var(--surface-quiet); color: var(--ink-muted);
+  flex: none;
+}
+.stage.done { background: var(--key); color: #fff; box-shadow: 0 3px 0 var(--key-lip); }
+.stage-line { height: 4px; flex: 1; min-width: 8px; background: var(--surface-quiet); border-radius: 2px; }
+.stage-line.done { background: var(--key); }
+
+/* with people */
+.people { display: grid; gap: var(--s5); }
+@media (min-width: 52rem) { .people { grid-template-columns: 1.2fr 1fr; align-items: stretch; } }
+.modes { display: grid; gap: var(--s3); }
+.mode {
+  display: grid; grid-template-columns: auto 1fr; gap: var(--s3); align-items: center;
+  background: color-mix(in srgb, var(--on-teal) 14%, transparent);
+  border-radius: var(--r-control); padding: var(--s3) var(--s4);
+}
+.mode .ico { width: 36px; height: 36px; }
+.mode .ico svg { width: 100%; height: 100%; display: block; }
+.mode strong { font-family: var(--font-game); font-weight: 800; font-size: 1.0625rem; display: block; }
+.mode span { font-size: .9375rem; opacity: .9; }
+.duel {
+  display: grid; gap: var(--s3);
+}
+.duel-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s3) 0; border-bottom: 1px solid var(--hairline); }
+.duel-row:last-child { border-bottom: 0; }
+.who { display: flex; align-items: center; gap: var(--s3); min-width: 0; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--teal); color: var(--on-teal); display: grid; place-items: center; font-family: var(--font-game); font-weight: 900; flex: none; }
+.who b { font-weight: 600; }
+.duel-score { font-family: var(--font-game); font-weight: 900; font-size: 1.375rem; font-variant-numeric: tabular-nums; }
+.won { color: var(--leaf); font-family: var(--font-game); font-weight: 800; font-size: .8125rem; }
+
+/* your words */
+.rarity { display: grid; gap: var(--s3); }
+.rarity-row { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--s3); align-items: center; }
+.rarity-row .tier { font-size: .9375rem; color: var(--ink-muted); }
+.chip.notable { background: var(--plum); color: var(--on-plum); }
+.chip.rare { background: var(--cobalt); color: var(--on-cobalt); }
+.chip.mythic { background: var(--gold); color: #3F3F3F; box-shadow: 0 3px 0 var(--gold-lip); }
+.count { font-family: var(--font-game); font-weight: 900; font-size: 2.5rem; line-height: 1; font-variant-numeric: tabular-nums; color: var(--plum); }
+.badges { display: flex; gap: var(--s3); flex-wrap: wrap; }
+.badge {
+  width: 56px; height: 56px; border-radius: var(--r-control);
+  background: var(--word); display: grid; place-items: center;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--word) 75%, #000);
+}
+.badge svg { width: 30px; height: 30px; }
+.badge.lit { background: var(--gold); box-shadow: 0 4px 0 var(--gold-lip); }
+.worn { display: inline-flex; align-items: center; gap: var(--s2); font-weight: 600; }
+.worn .badge { width: 28px; height: 28px; border-radius: 8px; box-shadow: 0 2px 0 var(--gold-lip); }
+.worn .badge svg { width: 16px; height: 16px; }
+
+/* fair */
+.fair { display: grid; gap: var(--s4); }
+@media (min-width: 52rem) { .fair { grid-template-columns: repeat(3, 1fr); } }
+.fair .card { display: grid; gap: var(--s3); align-content: start; }
+.check {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: color-mix(in srgb, var(--leaf) 16%, var(--surface));
+  display: grid; place-items: center; color: var(--leaf);
+}
+.check svg { width: 20px; height: 20px; }
+
+/* questions */
+.faq { display: grid; gap: var(--s3); max-width: 44rem; }
+.faq details {
+  background: var(--surface); border-radius: var(--r-card);
+  box-shadow: 0 4px 0 var(--surface-lip);
+}
+.faq summary {
+  list-style: none; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; gap: var(--s3);
+  min-height: 56px; padding: var(--s3) var(--s5);
+  font-weight: 600; font-size: 1.0625rem;
+  border-radius: var(--r-card);
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary .plus {
+  flex: none; width: 32px; height: 32px; border-radius: var(--r-chip);
+  background: var(--surface-quiet); display: grid; place-items: center;
+  font-family: var(--font-game); font-weight: 900; color: var(--cobalt);
+  transition: transform 160ms ease-out;
+}
+.faq details[open] .plus { transform: rotate(45deg); }
+.faq .answer { padding: 0 var(--s5) var(--s5); color: var(--ink-muted); max-width: 38em; }
+
+/* footer */
+footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
+.foot { display: grid; gap: var(--s4); padding-block: 32px 48px; }
+@media (min-width: 44rem) { .foot { grid-template-columns: 1fr auto; align-items: center; } }
+.foot nav { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); }
+.foot nav a, .foot nav span { min-height: 44px; display: inline-flex; align-items: center; }
+.foot nav span { color: var(--ink-muted); }
+.foot small { color: var(--ink-muted); font-size: .8125rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 120ms !important; }
+  .key:active { transform: none; }
+}
 </style>
 </head>
 <body>
-  <img class="icon" src="icon-1024.png" alt="Meep">
-  <h1>Meep</h1>
-  <p class="lead">A word game you can play against someone who is not in the room.
-  Send a board, they play the same letters under the same rules, and the scores appear
-  when you have both finished.</p>
 
-  <h2>Links</h2>
-  <ul>
-    <li><a href="privacy.html">Privacy Policy</a></li>
-    <li><a href="support.html">Support</a></li>
-  </ul>
+
+<header class="wrap top">
+  <a class="brand-small" href="#top" aria-label="Home">
+    <img class="app-icon" src="app-icon-96.png" width="32" height="32" alt="">
+    <span data-brand>Meep</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="#how">How it plays</a>
+    <a href="#questions">Questions</a>
+  </nav>
+</header>
+
+<main id="top">
+  <!-- 1. Hero -->
+  <section class="wrap hero" aria-labelledby="brand-heading">
+    <div class="hero-copy">
+      <p class="eyebrow">A word game for iPhone</p>
+      <h1 class="wordmark" id="brand-heading" data-brand-tiles><span class="sr-only" data-brand>Meep</span></h1>
+      <!-- Placeholder promise for David: the App Store subtitle draft. -->
+      <p class="promise">Trace words. Beat the clock.</p>
+      <p class="lede">Find words on a grid of letter tiles before time runs out. Play the daily board, take on a friend, or match with someone new.</p>
+      <div class="cta-row">
+        <!-- At launch (week of 11 January 2027), replace this pill with Apple's official
+             "Download on the App Store" badge linking to the listing. No badge before then. -->
+        <span class="status-pill"><span class="dot" aria-hidden="true"></span>Coming to iPhone in January</span>
+        <a class="key" href="#how">See how it plays</a>
+      </div>
+    </div>
+
+    <div class="board-card" id="demo">
+      <p class="sr-only">An example round: a four by four board of letter tiles where the words words, trace, clock and rate are traced in gold, one after another.</p>
+      <div class="hud" aria-hidden="true">
+        <div><div class="label">Time</div><span class="num timer" id="timer">0:15</span></div>
+        <div class="score-wrap"><div class="label">Score</div><span class="num score" id="score">0</span></div>
+      </div>
+      <div class="board" id="board" aria-hidden="true">
+        <svg class="path-svg" id="pathSvg"></svg>
+      </div>
+      <div class="found" id="found" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- 2. How it plays -->
+  <section class="wrap block" id="how" aria-labelledby="how-h">
+    <div class="head">
+      <p class="eyebrow">How it plays</p>
+      <h2 id="how-h">Trace words on a letter grid</h2>
+      <p class="lede">Drag across touching tiles, sideways, up, down or corner to corner. Let go to play the word.</p>
+    </div>
+    <div class="grid3">
+      <div class="card stack step">
+        <div class="n" aria-hidden="true">1</div>
+        <h3>Pick a board</h3>
+        <p>Boards come in three sizes, from a quick 4×4 to a roomy 6×6.</p>
+        <div class="sizes" aria-label="Board sizes: 4 by 4, 5 by 5 and 6 by 6">
+          <div class="mini-board-wrap"><div class="mini-board" style="grid-template-columns:repeat(4,9px)" data-n="16"></div>4×4</div>
+          <div class="mini-board-wrap"><div class="mini-board" style="grid-template-columns:repeat(5,9px)" data-n="25"></div>5×5</div>
+          <div class="mini-board-wrap"><div class="mini-board" style="grid-template-columns:repeat(6,9px)" data-n="36"></div>6×6</div>
+        </div>
+      </div>
+      <div class="card stack step">
+        <div class="n" aria-hidden="true">2</div>
+        <h3>Find words before time runs out</h3>
+        <p>Every real word you trace is taken and added to your score. When the clock hits zero, the round ends.</p>
+      </div>
+      <div class="card stack step">
+        <div class="n" aria-hidden="true">3</div>
+        <h3>Go long</h3>
+        <p>Longer words score more. One long find can beat a handful of short ones.</p>
+        <div class="ladder" aria-hidden="true">
+          <span class="chip">RATE</span><span class="chip">TRACE</span><span class="chip">TRACED</span><span class="chip">RETRACED</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Every day -->
+  <section class="wrap block" aria-labelledby="daily-h">
+    <div class="head">
+      <p class="eyebrow">Every day</p>
+      <h2 id="daily-h">Something new every day</h2>
+    </div>
+    <div class="grid2">
+      <div class="keycap gold daily">
+        <p class="eyebrow">Daily Board</p>
+        <p class="big">One board. Everyone plays it.</p>
+        <div class="daily-tiles" aria-hidden="true"><span>D</span><span>A</span><span>I</span><span>L</span><span>Y</span></div>
+        <p>Same letters for every player, every day. See how you did next to your friends.</p>
+      </div>
+      <div class="keycap white daily">
+        <p class="eyebrow">Expedition</p>
+        <p class="big">Five stages a day</p>
+        <div class="stages" role="img" aria-label="Five stages, three beaten">
+          <span class="stage done">1</span><span class="stage-line done"></span>
+          <span class="stage done">2</span><span class="stage-line done"></span>
+          <span class="stage done">3</span><span class="stage-line"></span>
+          <span class="stage">4</span><span class="stage-line"></span>
+          <span class="stage">5</span>
+        </div>
+        <p>A short daily puzzle in five stages. Each one is beaten or not. No stars, no penalties.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. With people -->
+  <section class="wrap block" aria-labelledby="people-h">
+    <div class="head">
+      <p class="eyebrow">With people</p>
+      <h2 id="people-h">Play the same board as someone else</h2>
+    </div>
+    <div class="people">
+      <div class="keycap teal stack">
+        <div class="modes">
+          <div class="mode">
+            <span class="ico" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="13" r="5"/><path d="M4 29c1.5-5 5-7.5 9-7.5s7.5 2.5 9 7.5"/><path d="M24 12h8M28 8l4 4-4 4"/></svg></span>
+            <div><strong>Send a board to a friend</strong><span>A duel. You both play the same letters, then compare.</span></div>
+          </div>
+          <div class="mode">
+            <span class="ico" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="12" r="4"/><circle cx="25" cy="12" r="4"/><circle cx="18" cy="20" r="4"/><path d="M8 31c1-4 5-6 10-6s9 2 10 6"/></svg></span>
+            <div><strong>Send one to a group</strong><span>A party. Everyone gets the board and the best score wins.</span></div>
+          </div>
+          <div class="mode">
+            <span class="ico" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h6c6 0 8 14 14 14h6M27 21l4 4-4 4"/><path d="M5 25h6c2.5 0 4-2 5.3-4.6M20 13.5C21.3 12 22.8 11 25 11h6M27 7l4 4-4 4"/></svg></span>
+            <div><strong>Match with a stranger</strong><span>Random match finds you an opponent.</span></div>
+          </div>
+          <div class="mode">
+            <span class="ico" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 29V19M14 29V13M22 29V16M30 29V7"/></svg></span>
+            <div><strong>Rated boards</strong><span>For the competitive. Wins and losses move your rating.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card duel" aria-label="Example duel result">
+        <p class="eyebrow">Example duel</p>
+        <div class="duel-row">
+          <div class="who"><span class="avatar" aria-hidden="true">A</span><b>Avery</b></div>
+          <div><span class="duel-score">142</span></div>
+        </div>
+        <div class="duel-row">
+          <div class="who"><span class="avatar" aria-hidden="true">Y</span><b>You</b></div>
+          <div style="text-align:right"><span class="duel-score">167</span><div class="won">Duel won</div></div>
+        </div>
+        <p style="color:var(--ink-muted);font-size:.9375rem">Same 5×5 board for both players.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Your words -->
+  <section class="wrap block" aria-labelledby="words-h">
+    <div class="head">
+      <p class="eyebrow">Your words</p>
+      <h2 id="words-h">Every word you find, kept for good</h2>
+      <p class="lede">Your Lexicon is a lifelong collection of every word you have found. Some turn up all the time. Some you may only see once.</p>
+    </div>
+    <div class="grid2">
+      <div class="card stack">
+        <div style="display:flex;align-items:baseline;gap:var(--s3)"><span class="count">1,284</span><span style="color:var(--ink-muted)">words in an example Lexicon</span></div>
+        <div class="rarity">
+          <div class="rarity-row"><span class="tier">Common</span><div><span class="chip">STONE</span></div></div>
+          <div class="rarity-row"><span class="tier">Notable</span><div><span class="chip notable">GLINT</span></div></div>
+          <div class="rarity-row"><span class="tier">Rare</span><div><span class="chip rare">QUARTZ</span></div></div>
+          <div class="rarity-row"><span class="tier">Mythic</span><div><span class="chip mythic">ZEPHYR</span></div></div>
+        </div>
+      </div>
+      <div class="card stack">
+        <h3>Achievements</h3>
+        <p style="color:var(--ink-muted)">Earn badges for collecting, rare finds, streaks and more. Wear your favorite next to your name.</p>
+        <div class="badges" aria-hidden="true">
+          <span class="badge lit"><svg viewBox="0 0 30 30" fill="none" stroke="#3F3F3F" stroke-width="2.4" stroke-linejoin="round"><path d="M15 4l3.2 6.6 7.3 1-5.3 5.1 1.3 7.2L15 20.5l-6.5 3.4 1.3-7.2-5.3-5.1 7.3-1z"/></svg></span>
+          <span class="badge lit"><svg viewBox="0 0 30 30" fill="none" stroke="#3F3F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4c3 4 6 6.5 6 11a6 6 0 0 1-12 0c0-2.5 1-4 2.5-5.5.3 2 1.3 3 2.5 3.5C13 9 14 6.5 15 4z"/></svg></span>
+          <span class="badge"><svg viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" style="color:var(--plum)"><path d="M15 4l9 6v10l-9 6-9-6V10z"/><path d="M6 10l9 6 9-6M15 16v10"/></svg></span>
+          <span class="badge"><svg viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="color:var(--plum)"><path d="M7 8h16M7 15h16M7 22h10"/></svg></span>
+        </div>
+        <p class="worn"><span class="badge lit" aria-hidden="true"><svg viewBox="0 0 30 30" fill="none" stroke="#3F3F3F" stroke-width="3" stroke-linejoin="round"><path d="M15 4l3.2 6.6 7.3 1-5.3 5.1 1.3 7.2L15 20.5l-6.5 3.4 1.3-7.2-5.3-5.1 7.3-1z"/></svg></span>avery_plays</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Fair by design -->
+  <section class="wrap block" aria-labelledby="fair-h">
+    <div class="head">
+      <p class="eyebrow">Fair by design</p>
+      <h2 id="fair-h">The best words win</h2>
+    </div>
+    <div class="fair">
+      <div class="card">
+        <span class="check" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg></span>
+        <h3>Free to play</h3>
+        <p style="color:var(--ink-muted)">Download it and play for free.</p>
+      </div>
+      <div class="card">
+        <span class="check" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg></span>
+        <h3>No pay-to-win</h3>
+        <p style="color:var(--ink-muted)">Nothing you can buy helps you score. No energy, no buying rank.</p>
+      </div>
+      <div class="card">
+        <span class="check" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg></span>
+        <h3>Checked scores</h3>
+        <p style="color:var(--ink-muted)">Challenge scores are checked by our server, so a win is a real win.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Questions -->
+  <section class="wrap block" id="questions" aria-labelledby="faq-h">
+    <div class="head">
+      <p class="eyebrow">Questions</p>
+      <h2 id="faq-h">Good to know</h2>
+    </div>
+    <div class="faq">
+      <details open>
+        <summary>Is it free?<span class="plus" aria-hidden="true">+</span></summary>
+        <p class="answer">Yes. <span data-brand>Meep</span> is free to play. Ads and an optional subscription will come later.</p>
+      </details>
+      <details>
+        <summary>Which devices?<span class="plus" aria-hidden="true">+</span></summary>
+        <p class="answer">iPhone.</p>
+      </details>
+      <details>
+        <summary>Where can I play?<span class="plus" aria-hidden="true">+</span></summary>
+        <p class="answer">In the US and Canada.</p>
+      </details>
+      <details>
+        <summary>How old do I need to be?<span class="plus" aria-hidden="true">+</span></summary>
+        <p class="answer">13 or older.</p>
+      </details>
+      <details>
+        <summary>When does it come out?<span class="plus" aria-hidden="true">+</span></summary>
+        <p class="answer">January 2027, on the App Store.</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<!-- 8. Footer -->
+<footer>
+  <div class="wrap foot">
+    <nav aria-label="Legal and help">
+      <a href="privacy.html">Privacy</a>
+      <a href="support.html">Support</a>
+      <!-- Community rules page is ruled but not written yet (decision 210). Link it here once it exists. -->
+      <span>Community rules (coming soon)</span>
+    </nav>
+    <small>Questions or feedback? Write to us at <a id="contact" href="mailto:support@shmeeblegames.com">support@shmeeblegames.com</a>. © 2026 <a href="https://shmeeblegames.com">Shmeeble Games LLC</a></small>
+  </div>
+</footer>
+
+<script>
+/* The working name lives here and only here (decision 206). A rename is this one line. */
+const BRAND = "Meep";
+
+(function () {
+  document.querySelectorAll("[data-brand]").forEach(el => { el.textContent = BRAND; });
+  document.title = BRAND + " for iPhone";
+  const wm = document.querySelector("[data-brand-tiles]");
+  if (wm) {
+    const sr = '<span class="sr-only">' + BRAND + '</span>';
+    wm.innerHTML = sr + [...BRAND.toUpperCase()].map(ch => '<span class="t" aria-hidden="true">' + ch + '</span>').join("");
+  }
+  document.querySelectorAll(".mini-board").forEach(mb => {
+    mb.innerHTML = "<i></i>".repeat(+mb.dataset.n);
+  });
+})();
+
+/* The one orchestrated moment: a 4x4 board tracing words in gold. */
+(function () {
+  const GRID = ["WORD", "ETAS", "BRCL", "KCOE"];
+  const WORDS = [
+    { w: "WORDS", p: [[0,0],[0,1],[0,2],[0,3],[1,3]] },
+    { w: "TRACE", p: [[1,1],[2,1],[1,2],[2,2],[3,3]] },
+    { w: "CLOCK", p: [[2,2],[2,3],[3,2],[3,1],[3,0]] },
+    { w: "RATE",  p: [[0,2],[1,2],[1,1],[1,0]] }
+  ];
+  const pts = w => w.length * 10 - 20;   // illustrative only
+  const board = document.getElementById("board");
+  const svg = document.getElementById("pathSvg");
+  const found = document.getElementById("found");
+  const scoreEl = document.getElementById("score");
+  const timerEl = document.getElementById("timer");
+  const card = document.getElementById("demo");
+  const NS = "http://www.w3.org/2000/svg";
+  const tiles = [];
+  GRID.forEach((row, r) => [...row].forEach((ch, c) => {
+    const t = document.createElement("div");
+    t.className = "tile"; t.textContent = ch;
+    board.appendChild(t); tiles.push(t);
+  }));
+  const tileAt = (r, c) => tiles[r * 4 + c];
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function center(r, c) {
+    const b = board.getBoundingClientRect(), t = tileAt(r, c).getBoundingClientRect();
+    return [t.left - b.left + t.width / 2, t.top - b.top + t.height / 2];
+  }
+  function drawPath(path, animate, ms) {
+    const b = board.getBoundingClientRect();
+    svg.setAttribute("viewBox", "0 0 " + b.width + " " + b.height);
+    svg.innerHTML = "";
+    const pl = document.createElementNS(NS, "polyline");
+    pl.setAttribute("points", path.map(([r, c]) => center(r, c).join(",")).join(" "));
+    pl.setAttribute("pathLength", "1");
+    const sw = Math.max(10, tileAt(0,0).getBoundingClientRect().width * 0.22);
+    pl.style.strokeWidth = sw;
+    if (animate) {
+      pl.style.strokeDasharray = "1"; pl.style.strokeDashoffset = "1";
+      pl.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: ms, easing: "linear", fill: "forwards" });
+    }
+    svg.appendChild(pl);
+    return pl;
+  }
+  function addChip(w, animate) {
+    const ph = found.querySelector(".placeholder"); if (ph) ph.remove();
+    const chip = document.createElement("span");
+    chip.className = "chip" + (animate ? " pop" : "");
+    chip.innerHTML = w + ' <span class="pts">+' + pts(w) + "</span>";
+    found.appendChild(chip);
+  }
+  function placeholder() {
+    found.innerHTML = '<span class="chip placeholder">Trace a word</span>';
+  }
+  function fmt(s) { return "0:" + String(s).padStart(2, "0"); }
+
+  function showStatic() {
+    tiles.forEach(t => t.classList.remove("on"));
+    found.innerHTML = "";
+    let total = 0;
+    WORDS.forEach(x => { addChip(x.w, false); total += pts(x.w); });
+    scoreEl.textContent = total;
+    timerEl.textContent = fmt(15);
+    timerEl.classList.remove("breathe");
+    const last = WORDS[1];
+    last.p.forEach(([r, c]) => tileAt(r, c).classList.add("on"));
+    drawPath(last.p, false);
+  }
+
+  let timers = [];
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+  function clearAll() { timers.forEach(clearTimeout); timers = []; }
+
+  function round() {
+    clearAll();
+    card.querySelectorAll(".times-up").forEach(n => n.remove());
+    tiles.forEach(t => t.classList.remove("on"));
+    svg.innerHTML = ""; placeholder();
+    let score = 0, secs = 15;
+    scoreEl.textContent = 0; timerEl.textContent = fmt(secs); timerEl.classList.remove("breathe");
+    for (let i = 1; i <= 15; i++) later(() => {
+      secs = 15 - i; timerEl.textContent = fmt(secs);
+      if (secs <= 10 && secs > 0) timerEl.classList.add("breathe");
+      if (secs === 0) { timerEl.classList.remove("breathe"); timesUp(); }
+    }, i * 1000);
+
+    let at = 700;
+    WORDS.forEach(({ w, p }) => {
+      const step = 150, traceMs = step * (p.length - 1);
+      later(() => {
+        drawPath(p, true, traceMs);
+        p.forEach(([r, c], k) => later(() => tileAt(r, c).classList.add("on"), k * step));
+      }, at);
+      later(() => {
+        addChip(w, true);
+        score += pts(w); scoreEl.textContent = score;
+        scoreEl.classList.remove("bump"); void scoreEl.offsetWidth; scoreEl.classList.add("bump");
+        const f = document.createElement("span");
+        f.className = "float-pts"; f.textContent = "+" + pts(w);
+        scoreEl.parentElement.appendChild(f); later(() => f.remove(), 820);
+      }, at + traceMs + 120);
+      later(() => {
+        const pl = svg.querySelector("polyline"); if (pl) pl.style.opacity = "0";
+        tiles.forEach(t => t.classList.remove("on"));
+      }, at + traceMs + 900);
+      at += traceMs + 1900;
+    });
+  }
+  function timesUp() {
+    const o = document.createElement("div");
+    o.className = "times-up"; o.innerHTML = "<span>Time!</span>";
+    card.appendChild(o);
+    later(round, 850 + 1400);
+  }
+
+  function start() {
+    clearAll();
+    card.querySelectorAll(".times-up").forEach(n => n.remove());
+    if (reduce.matches) showStatic(); else round();
+  }
+  reduce.addEventListener?.("change", start);
+  let rz; window.addEventListener("resize", () => {
+    clearTimeout(rz);
+    rz = setTimeout(() => {
+      const on = tiles.map((t, i) => t.classList.contains("on") ? i : -1).filter(i => i >= 0);
+      if (svg.firstChild && on.length) {
+        const w = WORDS.find(x => x.p.length === on.length && x.p.every(([r, c]) => on.includes(r * 4 + c)));
+        if (w) drawPath(w.p, false);
+      }
+    }, 120);
+  });
+  start();
+})();
+</script>
+
 </body>
 </html>
