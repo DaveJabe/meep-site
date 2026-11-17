@@ -23,7 +23,7 @@
 </head>
 <body>
   <h1>Privacy Policy</h1>
-  <p class="eff">Meep &middot; Effective October 31, 2026</p>
+  <p class="eff">Meep &middot; Effective November 17, 2026</p>
 
   <p class="lead"><strong>Meep does not track you across other companies&rsquo; apps or
   websites.</strong> There is no advertising, no analytics service and no third-party SDK in the
@@ -58,7 +58,8 @@
   Settings. It is public and searchable by design: a handle is how someone finds you to
   send a board. A handle is checked against a word list when you set it, and existing handles are
   checked again when that list changes; a handle that fails is replaced with a placeholder and you
-  are told.</p>
+  are told. So that nobody can page through every player, Meep counts how many handles each account
+  looks up in a day; that count is deleted after two days.</p>
 
   <h2>Your photo</h2>
   <p>Optional. If you set one, it is chosen through the system photo picker (Meep never asks for
@@ -158,7 +159,8 @@
   <h2>Notifications</h2>
   <p>If you allow notifications, Meep stores the token Apple issues for your device, along with
   the build it came from, your locale, and which kinds of notification you have switched on. A token
-  Apple reports as dead is dropped after 30 days; all of them are destroyed with your account. You
+  Apple reports as dead is dropped after 30 days, and one no phone has used for 180 days (a phone
+  that has not opened Meep in half a year) is deleted; all of them are destroyed with your account. You
   can turn notifications off in iOS Settings at any time and the game works without them.</p>
 
   <h2>Reports, blocks and moderation</h2>
@@ -167,7 +169,8 @@
   person can read it. A person does: reports go to a queue the developer reads, and the possible
   actions are a warning, a replacement handle, a suspension for a number of days (during which the
   player cannot sign in and is told the date it ends), removal of a photo, or closing the report.
-  Every action is logged with who took it, when and why. Reports and those logs are kept.</p>
+  Every action is logged with who took it, when and why. A report stays until a person closes it,
+  and is deleted 90 days after it is closed; the log of actions taken is kept.</p>
   <p>Blocking someone hides you from each other in Meep: neither of you can find, invite, match with
   or see the other, and it ends any board between you that nobody has played yet. A board you had
   both already accepted keeps running to its result. The person you block is not told.</p>
@@ -208,13 +211,15 @@
     <tr><td>The server&rsquo;s own copy of a competitive round&rsquo;s move log and cheating measurements</td><td>90 days</td></tr>
     <tr><td>The record of which parts of the app you use</td><td>90 days</td></tr>
     <tr><td>Sessions</td><td>60 days after the last refresh</td></tr>
-    <tr><td>Phone verification attempts, and the day&rsquo;s contacts count and summary</td><td>2 days</td></tr>
+    <tr><td>Phone verification attempts, the day&rsquo;s contacts count and summary, and the day&rsquo;s count of handles your account looked up</td><td>2 days</td></tr>
     <tr><td>A request for a random opponent</td><td>7 days, then marked lapsed</td></tr>
     <tr><td>Dead notification tokens</td><td>30 days</td></tr>
-    <tr><td>Finished boards, reports and moderation logs</td><td>Not yet deleted on a schedule</td></tr>
+    <tr><td>Notification registrations no phone has used</td><td>180 days</td></tr>
+    <tr><td>A report, once it is closed</td><td>90 days</td></tr>
+    <tr><td>Finished boards and moderation logs</td><td>Not yet deleted on a schedule</td></tr>
   </table>
-  <p>The last row is honest rather than final: finished boards, reports and moderation records are
-  kept today, and a schedule for them is being decided.</p>
+  <p>The last row is honest rather than final: finished boards and the log of moderation actions
+  are kept today, and a schedule for them is being decided.</p>
 
   <h2>Deleting your account</h2>
   <p>In the app: <strong>Settings &rarr; Delete account</strong>. In one step it destroys every
