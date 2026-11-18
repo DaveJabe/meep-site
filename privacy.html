@@ -23,7 +23,7 @@
 </head>
 <body>
   <h1>Privacy Policy</h1>
-  <p class="eff">Meep &middot; Effective November 17, 2026</p>
+  <p class="eff">Meep &middot; Effective November 18, 2026</p>
 
   <p class="lead"><strong>Meep does not track you across other companies&rsquo; apps or
   websites.</strong> There is no advertising, no analytics service and no third-party SDK in the
@@ -37,10 +37,11 @@
   App Store in the United States and Canada.</p>
 
   <h2>Your account</h2>
-  <p>On first launch your device generates a random 32-byte secret and keeps it in the iOS
-  Keychain. The server stores only its SHA-256, so a copy of the database is not a list of ways to
-  sign in as its own rows. You are never asked to create an account and never shown a login
-  screen.</p>
+  <p>The first time you open Meep, it asks whether you are new here or want to sign in with
+  Apple. Tapping <strong>New here?</strong> asks you for nothing: your device generates a random
+  32-byte secret and keeps it in the iOS Keychain. The server stores only its SHA-256, so a copy of
+  the database is not a list of ways to sign in as its own rows. No account exists until you tap one
+  of the two, and you never give a name, an email address or a password.</p>
   <p>Along with the account, the server keeps: your sessions (a hashed sign-in token, which
   expires 60 days after it was last refreshed); a record of each install that has signed in (the
   platform and the app build); and the device attestation Apple issues for that install (a key
@@ -144,6 +145,12 @@
   (the preset you asked for, your rating at the time, and when) for up to seven days, until it is
   paired or lapses. Your rating is stored on your account, and each rated board writes a receipt of
   how it moved your rating and your opponent&rsquo;s.</p>
+  <p>A Duel by turns sent into an iMessage chat is a bubble that carries the game&rsquo;s id and a
+  one-time code. The server keeps a record of each bubble you send: who sent it, a hash of the code
+  (never the code itself), the turn clock you chose, when it expires, and who claimed it and when.
+  Whoever claims it plays you and becomes your friend. Nothing from the conversation itself reaches
+  Meep&rsquo;s server: not its messages, its members or their numbers. The record is deleted 30 days after the
+  invite expires, or with your account.</p>
 
   <h2>Achievements</h2>
   <p>The achievements you earn are counted on your account: how many, the three most recent, and
@@ -176,7 +183,8 @@
   both already accepted keeps running to its result. The person you block is not told.</p>
 
   <h2>The subscription</h2>
-  <p>Meep Premium is bought through the App Store. Apple handles the payment; Meep never receives
+  <p>Meep does not sell a subscription today. If it does, Meep Premium will be bought through the
+  App Store. Apple handles the payment; Meep never receives
   your card or any payment detail, and keeps no record of the purchase on its server. Whether you
   are subscribed is read on your phone from the App Store. Deleting the app or deleting your Meep
   account does not cancel a subscription: cancel it in your Apple subscription settings.</p>
@@ -215,6 +223,7 @@
     <tr><td>A request for a random opponent</td><td>7 days, then marked lapsed</td></tr>
     <tr><td>Dead notification tokens</td><td>30 days</td></tr>
     <tr><td>Notification registrations no phone has used</td><td>180 days</td></tr>
+    <tr><td>A Duel by turns invite sent in iMessage</td><td>30 days after it expires</td></tr>
     <tr><td>A report, once it is closed</td><td>90 days</td></tr>
     <tr><td>Finished boards and moderation logs</td><td>Not yet deleted on a schedule</td></tr>
   </table>

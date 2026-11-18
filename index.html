@@ -56,6 +56,11 @@
   --tile: #FFFFFF;           /* white tiles, charcoal letters, both looks */
   --tile-ink: #3F3F3F;
   --tile-lip: color-mix(in srgb, #FFFFFF 75%, #000);
+  /* word rarities, MeepPalette's tier colors */
+  --tier-uncommon: #643F25; --on-uncommon: #FFFFFF;
+  --tier-notable: #6E5A9E; --on-notable: #FFFFFF;
+  --tier-epic: #FE8EDE; --on-epic: #162344;
+  --on-special: #162344;
   --surface-lip: color-mix(in srgb, var(--surface) 75%, #000);
   --scrim: color-mix(in srgb, var(--canvas) 70%, transparent);
 
@@ -78,6 +83,9 @@
     --leaf: #7ECB83; --coral: #FF9984;
     --canvas: #22282E; --surface: #373D43; --surface-quiet: #4A5058;
     --ink: #F2F2F2; --ink-muted: #C2C8CE; --hairline: #51575D;
+    --tier-uncommon: #A98967; --on-uncommon: #2A1D02;
+    --tier-notable: #CFB8FF; --on-notable: #162344;
+    --tier-epic: #F2A7D4;
     color-scheme: dark;
   }
 }
@@ -89,6 +97,9 @@
   --leaf: #7ECB83; --coral: #FF9984;
   --canvas: #22282E; --surface: #373D43; --surface-quiet: #4A5058;
   --ink: #F2F2F2; --ink-muted: #C2C8CE; --hairline: #51575D;
+  --tier-uncommon: #A98967; --on-uncommon: #2A1D02;
+  --tier-notable: #CFB8FF; --on-notable: #162344;
+  --tier-epic: #F2A7D4;
   color-scheme: dark;
 }
 
@@ -365,7 +376,7 @@ section.block { padding-block: 56px; display: grid; gap: var(--s5); }
 .mode strong { font-family: var(--font-game); font-weight: 800; font-size: 1.0625rem; display: block; }
 .mode span { font-size: .9375rem; opacity: .9; }
 .duel {
-  display: grid; gap: var(--s3);
+  display: grid; gap: var(--s3); align-content: start;
 }
 .duel-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s3) 0; border-bottom: 1px solid var(--hairline); }
 .duel-row:last-child { border-bottom: 0; }
@@ -377,11 +388,75 @@ section.block { padding-block: 56px; display: grid; gap: var(--s5); }
 
 /* your words */
 .rarity { display: grid; gap: var(--s3); }
+.rarity { gap: var(--s2); }
 .rarity-row { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--s3); align-items: center; }
 .rarity-row .tier { font-size: .9375rem; color: var(--ink-muted); }
-.chip.notable { background: var(--plum); color: var(--on-plum); }
+.chip.common { background: var(--surface-quiet); color: var(--ink); }
+.chip.uncommon { background: var(--tier-uncommon); color: var(--on-uncommon); }
+.chip.notable { background: var(--tier-notable); color: var(--on-notable); }
 .chip.rare { background: var(--cobalt); color: var(--on-cobalt); }
+.chip.epic { background: var(--tier-epic); color: var(--on-epic); }
 .chip.mythic { background: var(--gold); color: #3F3F3F; box-shadow: 0 3px 0 var(--gold-lip); }
+.chip.special {
+  background: linear-gradient(90deg, #FF6B6B, #FF9F40, #FFD93D, #5FD97A, #3CCFE0, #6E9BFF, #B482FF);
+  color: var(--on-special);
+}
+
+/* ways to play */
+.grid4 { display: grid; gap: var(--s5); }
+@media (min-width: 44rem) { .grid4 { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 64rem) { .grid4 { grid-template-columns: repeat(4, 1fr); } }
+.way .tag {
+  justify-self: start;
+  font-family: var(--font-game); font-weight: 800; font-size: .8125rem;
+  padding: 2px var(--s3); border-radius: 999px;
+  background: var(--surface-quiet); color: var(--ink-muted);
+}
+.muted { color: var(--ink-muted); }
+
+/* the Daily Board's week */
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.week div {
+  display: grid; gap: 2px; justify-items: center;
+  padding: 6px 0; border-radius: 10px;
+  background: color-mix(in srgb, #FFFFFF 55%, transparent);
+  font-family: var(--font-game); font-weight: 900; font-size: .875rem; color: #3F3F3F;
+}
+.week div small { font-weight: 800; font-size: .6875rem; opacity: .75; }
+
+/* make it yours */
+.themes { display: grid; gap: var(--s3); }
+@media (min-width: 44rem) { .themes { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 64rem) { .themes { grid-template-columns: repeat(4, 1fr); } }
+.theme { display: grid; grid-template-columns: auto 1fr; gap: var(--s3); align-items: start; }
+.swatch { width: 40px; height: 40px; border-radius: 12px; flex: none; box-shadow: 0 3px 0 rgba(0,0,0,.18); }
+.theme strong { font-family: var(--font-game); font-weight: 800; display: block; }
+.theme span { font-size: .9375rem; color: var(--ink-muted); }
+
+/* messages */
+.messages { display: grid; gap: var(--s4); align-items: center; }
+@media (min-width: 44rem) { .messages { grid-template-columns: auto 1fr; } }
+.bubble {
+  justify-self: start;
+  display: grid; gap: 6px; padding: var(--s3) var(--s4);
+  border-radius: 20px 20px 20px 6px;
+  background: var(--surface-quiet);
+  font-family: var(--font-game); font-weight: 800;
+}
+.bubble .mini-board i { background: var(--tile); }
+
+/* what's next */
+.next { display: grid; gap: var(--s5); }
+@media (min-width: 52rem) { .next { grid-template-columns: repeat(3, 1fr); } }
+.next .card { display: grid; gap: var(--s4); align-content: start; }
+.next ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--s3); }
+.next li { display: grid; grid-template-columns: 12px 1fr; gap: var(--s3); align-items: baseline; }
+.next li::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--cobalt); transform: translateY(1px); }
+.next .later li::before { background: transparent; box-shadow: inset 0 0 0 2px var(--cobalt); }
+.next li b { font-weight: 600; }
+.phase { display: flex; align-items: center; gap: var(--s2); }
+.phase .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--leaf); }
+.note { font-size: .875rem; color: var(--ink-muted); }
 .count { font-family: var(--font-game); font-weight: 900; font-size: 2.5rem; line-height: 1; font-variant-numeric: tabular-nums; color: var(--plum); }
 .badges { display: flex; gap: var(--s3); flex-wrap: wrap; }
 .badge {
@@ -454,6 +529,7 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
   </a>
   <nav aria-label="Sections">
     <a href="#how">How it plays</a>
+    <a href="#next">What's next</a>
     <a href="#questions">Questions</a>
   </nav>
 </header>
@@ -466,7 +542,7 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
       <h1 class="wordmark" id="brand-heading" data-brand-tiles><span class="sr-only" data-brand>Meep</span></h1>
       <!-- Placeholder promise for David: the App Store subtitle draft. -->
       <p class="promise">Trace words. Beat the clock.</p>
-      <p class="lede">Find words on a grid of letter tiles before time runs out. Play the daily board, take on a friend, or match with someone new.</p>
+      <p class="lede">Find words on a grid of letter tiles before time runs out. Play the Daily Board, take on a friend, or match with someone new. Meep is in beta testing now and comes to the App Store in January 2027.</p>
       <div class="cta-row">
         <!-- At launch (week of 11 January 2027), replace this pill with Apple's official
              "Download on the App Store" badge linking to the listing. No badge before then. -->
@@ -499,17 +575,17 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
       <div class="card stack step">
         <div class="n" aria-hidden="true">1</div>
         <h3>Pick a board</h3>
-        <p>Boards come in three sizes, from a quick 4×4 to a roomy 6×6.</p>
+        <p>Boards come in three sizes: the Small Board (4×4), the Big Board (5×5) and the Giant Board (6×6).</p>
         <div class="sizes" aria-label="Board sizes: 4 by 4, 5 by 5 and 6 by 6">
-          <div class="mini-board-wrap"><div class="mini-board" style="grid-template-columns:repeat(4,9px)" data-n="16"></div>4×4</div>
-          <div class="mini-board-wrap"><div class="mini-board" style="grid-template-columns:repeat(5,9px)" data-n="25"></div>5×5</div>
-          <div class="mini-board-wrap"><div class="mini-board" style="grid-template-columns:repeat(6,9px)" data-n="36"></div>6×6</div>
+          <div class="mini-board-wrap"><div class="mini-board" style="grid-template-columns:repeat(4,9px)" data-n="16"></div>Small</div>
+          <div class="mini-board-wrap"><div class="mini-board" style="grid-template-columns:repeat(5,9px)" data-n="25"></div>Big</div>
+          <div class="mini-board-wrap"><div class="mini-board" style="grid-template-columns:repeat(6,9px)" data-n="36"></div>Giant</div>
         </div>
       </div>
       <div class="card stack step">
         <div class="n" aria-hidden="true">2</div>
         <h3>Find words before time runs out</h3>
-        <p>Every real word you trace is taken and added to your score. When the clock hits zero, the round ends.</p>
+        <p>Every real word you trace lights up and is added to your score. When the clock hits zero, the round ends.</p>
       </div>
       <div class="card stack step">
         <div class="n" aria-hidden="true">3</div>
@@ -522,7 +598,37 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
     </div>
   </section>
 
-  <!-- 3. Every day -->
+  <!-- 3. Ways to play -->
+  <section class="wrap block" id="games" aria-labelledby="games-h">
+    <div class="head">
+      <p class="eyebrow">Ways to play</p>
+      <h2 id="games-h">Four games, every board size</h2>
+    </div>
+    <div class="grid4">
+      <div class="card stack way">
+        <span class="tag">Timed</span>
+        <h3>Classic</h3>
+        <p class="muted">As many words as you can before the clock runs out. Pick a fast clock or a longer one.</p>
+      </div>
+      <div class="card stack way">
+        <span class="tag">No clock</span>
+        <h3>Best of Three</h3>
+        <p class="muted">Play three words. The highest total of the three wins.</p>
+      </div>
+      <div class="card stack way">
+        <span class="tag">Turn by turn</span>
+        <h3>Duel</h3>
+        <p class="muted">A word each, eight turns a side, on a board that changes as you play. Take on @meepbot at Easy, Normal or Hard, or a friend.</p>
+      </div>
+      <div class="card stack way">
+        <span class="tag">No clock</span>
+        <h3>Practice</h3>
+        <p class="muted">Any size, no clock and nothing at stake. Good for warming up.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Every day -->
   <section class="wrap block" aria-labelledby="daily-h">
     <div class="head">
       <p class="eyebrow">Every day</p>
@@ -532,12 +638,20 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
       <div class="keycap gold daily">
         <p class="eyebrow">Daily Board</p>
         <p class="big">One board. Everyone plays it.</p>
-        <div class="daily-tiles" aria-hidden="true"><span>D</span><span>A</span><span>I</span><span>L</span><span>Y</span></div>
-        <p>Same letters for every player, every day. See how you did next to your friends.</p>
+        <div class="week" role="img" aria-label="The Daily Board's week: Monday Small, Tuesday Big, Wednesday Giant, Thursday Small, Friday Big, Saturday Giant, Sunday Big">
+          <div>M<small>Small</small></div>
+          <div>T<small>Big</small></div>
+          <div>W<small>Giant</small></div>
+          <div>T<small>Small</small></div>
+          <div>F<small>Big</small></div>
+          <div>S<small>Giant</small></div>
+          <div>S<small>Big</small></div>
+        </div>
+        <p>Same letters for every player, every day. The size changes through the week, and the board gets harder as the week goes on: easy on Monday and Tuesday, medium on Wednesday and Thursday, hard from Friday to Sunday. See how you did next to your friends for the day, the week and the month.</p>
       </div>
       <div class="keycap white daily">
         <p class="eyebrow">Expedition</p>
-        <p class="big">Five stages a day</p>
+        <p class="big">Five stages a day, for now</p>
         <div class="stages" role="img" aria-label="Five stages, three beaten">
           <span class="stage done">1</span><span class="stage-line done"></span>
           <span class="stage done">2</span><span class="stage-line done"></span>
@@ -545,69 +659,88 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
           <span class="stage">4</span><span class="stage-line"></span>
           <span class="stage">5</span>
         </div>
-        <p>A short daily puzzle in five stages. Each one is beaten or not. No stars, no penalties.</p>
+        <p>In the beta, Expedition is a short daily puzzle in five stages, each one beaten or not. Before release it becomes a road of levels. <a href="#next">See what's next</a>.</p>
       </div>
     </div>
   </section>
 
-  <!-- 4. With people -->
+  <!-- 5. With people -->
   <section class="wrap block" aria-labelledby="people-h">
     <div class="head">
       <p class="eyebrow">With people</p>
       <h2 id="people-h">Play the same board as someone else</h2>
+      <p class="lede">Add friends by username, friend code, your contacts or an invite link.</p>
     </div>
     <div class="people">
       <div class="keycap teal stack">
         <div class="modes">
           <div class="mode">
             <span class="ico" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="13" r="5"/><path d="M4 29c1.5-5 5-7.5 9-7.5s7.5 2.5 9 7.5"/><path d="M24 12h8M28 8l4 4-4 4"/></svg></span>
-            <div><strong>Send a board to a friend</strong><span>A duel. You both play the same letters, then compare.</span></div>
+            <div><strong>Send a board to a friend</strong><span>You both play the same letters. Neither of you sees a score until you have both finished.</span></div>
           </div>
           <div class="mode">
             <span class="ico" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="12" r="4"/><circle cx="25" cy="12" r="4"/><circle cx="18" cy="20" r="4"/><path d="M8 31c1-4 5-6 10-6s9 2 10 6"/></svg></span>
-            <div><strong>Send one to a group</strong><span>A party. Everyone gets the board and the best score wins.</span></div>
+            <div><strong>Start a party</strong><span>Send one board to a group. It stays open for a day, and the best score wins.</span></div>
           </div>
           <div class="mode">
             <span class="ico" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h6c6 0 8 14 14 14h6M27 21l4 4-4 4"/><path d="M5 25h6c2.5 0 4-2 5.3-4.6M20 13.5C21.3 12 22.8 11 25 11h6M27 7l4 4-4 4"/></svg></span>
-            <div><strong>Match with a stranger</strong><span>Random match finds you an opponent.</span></div>
+            <div><strong>Random match</strong><span>Meep finds someone else who is waiting, close to your rating.</span></div>
+          </div>
+          <div class="mode">
+            <span class="ico" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="12"/><path d="M18 11v7l5 3"/></svg></span>
+            <div><strong>Duel, live or by turns</strong><span>Play a Duel with a friend in real time, or by turns, where each turn waits up to 24 hours.</span></div>
           </div>
           <div class="mode">
             <span class="ico" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 29V19M14 29V13M22 29V16M30 29V7"/></svg></span>
-            <div><strong>Rated boards</strong><span>For the competitive. Wins and losses move your rating.</span></div>
+            <div><strong>Rated boards and leaderboards</strong><span>Wins and losses move your rating, and Meep keeps your best. Leaderboards cover today, this week, this month and all time.</span></div>
           </div>
         </div>
       </div>
-      <div class="card duel" aria-label="Example duel result">
-        <p class="eyebrow">Example duel</p>
+      <div class="card duel" aria-label="Example result">
+        <p class="eyebrow">Example result</p>
         <div class="duel-row">
           <div class="who"><span class="avatar" aria-hidden="true">A</span><b>Avery</b></div>
           <div><span class="duel-score">142</span></div>
         </div>
         <div class="duel-row">
           <div class="who"><span class="avatar" aria-hidden="true">Y</span><b>You</b></div>
-          <div style="text-align:right"><span class="duel-score">167</span><div class="won">Duel won</div></div>
+          <div style="text-align:right"><span class="duel-score">167</span><div class="won">Won</div></div>
         </div>
-        <p style="color:var(--ink-muted);font-size:.9375rem">Same 5×5 board for both players.</p>
+        <p style="color:var(--ink-muted);font-size:.9375rem">Same Big Board for both players.</p>
+      </div>
+    </div>
+    <div class="card messages">
+      <div class="bubble" aria-hidden="true">
+        <div class="mini-board" style="grid-template-columns:repeat(5,9px)" data-n="25"></div>
+        Duel by turns
+      </div>
+      <div class="stack">
+        <h3>Play in Messages</h3>
+        <p class="muted">In any iMessage chat, tap +, then Meep, to send a Duel by turns. Your friend taps the bubble to join, and you both play your turns right in the chat.</p>
       </div>
     </div>
   </section>
 
-  <!-- 5. Your words -->
+  <!-- 6. Your words -->
   <section class="wrap block" aria-labelledby="words-h">
     <div class="head">
       <p class="eyebrow">Your words</p>
       <h2 id="words-h">Every word you find, kept for good</h2>
-      <p class="lede">Your Lexicon is a lifelong collection of every word you have found. Some turn up all the time. Some you may only see once.</p>
+      <p class="lede">Your Lexicon is a lifelong collection of every word you have found. Each word has a rarity, set by how often people use it and its family of words. Some turn up all the time. Some you may only see once.</p>
     </div>
     <div class="grid2">
       <div class="card stack">
         <div style="display:flex;align-items:baseline;gap:var(--s3)"><span class="count">1,284</span><span style="color:var(--ink-muted)">words in an example Lexicon</span></div>
         <div class="rarity">
-          <div class="rarity-row"><span class="tier">Common</span><div><span class="chip">STONE</span></div></div>
+          <div class="rarity-row"><span class="tier">Common</span><div><span class="chip common">STONE</span></div></div>
+          <div class="rarity-row"><span class="tier">Uncommon</span><div><span class="chip uncommon">BRISK</span></div></div>
           <div class="rarity-row"><span class="tier">Notable</span><div><span class="chip notable">GLINT</span></div></div>
           <div class="rarity-row"><span class="tier">Rare</span><div><span class="chip rare">QUARTZ</span></div></div>
+          <div class="rarity-row"><span class="tier">Epic</span><div><span class="chip epic">GNARL</span></div></div>
           <div class="rarity-row"><span class="tier">Mythic</span><div><span class="chip mythic">ZEPHYR</span></div></div>
+          <div class="rarity-row"><span class="tier">Special</span><div><span class="chip special">MEEP</span></div></div>
         </div>
+        <p class="note">Words climb from Common to Mythic. Long words count for more, and the Meep words are Special.</p>
       </div>
       <div class="card stack">
         <h3>Achievements</h3>
@@ -623,7 +756,26 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
     </div>
   </section>
 
-  <!-- 6. Fair by design -->
+  <!-- 7. Make it yours -->
+  <section class="wrap block" aria-labelledby="themes-h">
+    <div class="head">
+      <p class="eyebrow">Make it yours</p>
+      <h2 id="themes-h">Themes for your home screen</h2>
+      <p class="lede">Pick a theme in Appearance on the You page, in light or dark. Tap one to preview it first.</p>
+    </div>
+    <div class="themes">
+      <div class="card theme"><span class="swatch" style="background:#5771CC" aria-hidden="true"></span><div><strong>Your color</strong><span>Your own tile, in your color. The theme you start with.</span></div></div>
+      <div class="card theme"><span class="swatch" style="background:linear-gradient(160deg,#7FB6F0,#F6C38B)" aria-hidden="true"></span><div><strong>Time of day</strong><span>A sky with the real moon, and the sun rising and setting at your local times.</span></div></div>
+      <div class="card theme"><span class="swatch" style="background:linear-gradient(160deg,#E39A4C,#9CC7E8)" aria-hidden="true"></span><div><strong>Season</strong><span>Leaves, snow or blossom, by the time of year.</span></div></div>
+      <div class="card theme"><span class="swatch" style="background:linear-gradient(160deg,#2B1D52,#E34FA0)" aria-hidden="true"></span><div><strong>Arcade</strong><span>A night look with glowing keys.</span></div></div>
+      <div class="card theme"><span class="swatch" style="background:linear-gradient(160deg,#F4EFE4,#C9D8B6)" aria-hidden="true"></span><div><strong>Paper</strong><span>Rolling hills, drawn like paper.</span></div></div>
+      <div class="card theme"><span class="swatch" style="background:var(--word-strong)" aria-hidden="true"></span><div><strong>Lexicon</strong><span>A wall of your own words. Opens once you have found 100.</span></div></div>
+      <div class="card theme"><span class="swatch" style="background:linear-gradient(160deg,#E8D7B5,#8FBDB7)" aria-hidden="true"></span><div><strong>Plaza</strong><span>Today's Daily players walk the square. Opens when five friends you invite join.</span></div></div>
+      <div class="card theme"><span class="swatch" style="background:linear-gradient(160deg,#1F5A3A,#7FBF5A)" aria-hidden="true"></span><div><strong>Monstera</strong><span>A jungle. Coming with Expedition's first chapter.</span></div></div>
+    </div>
+  </section>
+
+  <!-- 8. Fair by design -->
   <section class="wrap block" aria-labelledby="fair-h">
     <div class="head">
       <p class="eyebrow">Fair by design</p>
@@ -638,7 +790,7 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
       <div class="card">
         <span class="check" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg></span>
         <h3>No pay-to-win</h3>
-        <p style="color:var(--ink-muted)">Nothing you can buy helps you score. No energy, no buying rank.</p>
+        <p style="color:var(--ink-muted)">Nothing you can buy helps you score, and nobody can buy rank.</p>
       </div>
       <div class="card">
         <span class="check" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg></span>
@@ -648,7 +800,45 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
     </div>
   </section>
 
-  <!-- 7. Questions -->
+  <!-- 9. What's next -->
+  <section class="wrap block" id="next" aria-labelledby="next-h">
+    <div class="head">
+      <p class="eyebrow">What's next</p>
+      <h2 id="next-h">Where Meep is headed</h2>
+      <p class="lede">Where things stand in November 2026. Plans can change, and this page will change with them.</p>
+    </div>
+    <div class="next">
+      <div class="card">
+        <p class="phase eyebrow"><span class="dot" aria-hidden="true"></span>Now</p>
+        <h3>In beta</h3>
+        <ul>
+          <li><span>Beta testers play Meep on TestFlight, with a new build most weeks.</span></li>
+          <li><span>Everything above is in the beta today, except what is marked as coming.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="phase eyebrow">Before release, January 2027</p>
+        <h3>Coming to the App Store</h3>
+        <ul>
+          <li><span><b>Expedition becomes a road of levels.</b> Chapter 1 is the Jungle, 25 levels. Finishing it unlocks the Monstera theme.</span></li>
+          <li><span><b>A Daily Puzzle</b> beside the Daily Board: reach a target score before the clock runs out.</span></li>
+          <li><span><b>A simpler New sheet</b>, with fewer steps to start a game, and a place of its own for Duel.</span></li>
+          <li><span><b>Release</b> on the App Store in the United States and Canada.</span></li>
+        </ul>
+      </div>
+      <div class="card later">
+        <p class="phase eyebrow">After release</p>
+        <h3>Further out</h3>
+        <ul class="later">
+          <li><span><b>More Expedition chapters</b>, with new kinds of boards and challenges.</span></li>
+          <li><span><b>Ads in the free game</b>, with a way to pay to remove them. Nothing you buy will help you score.</span></li>
+          <li><span><b>Android and the web</b> are being explored, including a party played on a TV through a browser.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Questions -->
   <section class="wrap block" id="questions" aria-labelledby="faq-h">
     <div class="head">
       <p class="eyebrow">Questions</p>
@@ -656,30 +846,42 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
     </div>
     <div class="faq">
       <details open>
+        <summary>When does it come out?<span class="plus" aria-hidden="true">+</span></summary>
+        <p class="answer">January 2027, on the App Store. It is in beta testing on TestFlight now.</p>
+      </details>
+      <details>
         <summary>Is it free?<span class="plus" aria-hidden="true">+</span></summary>
-        <p class="answer">Yes. <span data-brand>Meep</span> is free to play. Ads and an optional subscription will come later.</p>
+        <p class="answer">Yes. <span data-brand>Meep</span> is free to play. Ads, and a way to pay to remove them, are planned for later. Nothing you can buy helps you score.</p>
       </details>
       <details>
         <summary>Which devices?<span class="plus" aria-hidden="true">+</span></summary>
-        <p class="answer">iPhone.</p>
+        <p class="answer">iPhone, on iOS 18 or later. Duel by turns can also be played inside iMessage.</p>
+      </details>
+      <details>
+        <summary>Is it coming to Android?<span class="plus" aria-hidden="true">+</span></summary>
+        <p class="answer">Not at launch. Android and a version in the web browser are being looked at for after release.</p>
       </details>
       <details>
         <summary>Where can I play?<span class="plus" aria-hidden="true">+</span></summary>
-        <p class="answer">In the US and Canada.</p>
+        <p class="answer">In the United States and Canada.</p>
       </details>
       <details>
         <summary>How old do I need to be?<span class="plus" aria-hidden="true">+</span></summary>
         <p class="answer">13 or older.</p>
       </details>
       <details>
-        <summary>When does it come out?<span class="plus" aria-hidden="true">+</span></summary>
-        <p class="answer">January 2027, on the App Store.</p>
+        <summary>Do I need an account?<span class="plus" aria-hidden="true">+</span></summary>
+        <p class="answer">No sign-up. Tap New here? to start playing. Add Sign in with Apple in Settings if you want your account to move with you to a new phone.</p>
+      </details>
+      <details>
+        <summary>Does it work offline?<span class="plus" aria-hidden="true">+</span></summary>
+        <p class="answer">Playing on your own works with no connection. A round against other people that cannot be sent is saved and sent when you are back online.</p>
       </details>
     </div>
   </section>
 </main>
 
-<!-- 8. Footer -->
+<!-- 11. Footer -->
 <footer>
   <div class="wrap foot">
     <nav aria-label="Legal and help">
