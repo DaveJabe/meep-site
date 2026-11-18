@@ -554,9 +554,36 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
 .results-score span:last-child { color: var(--ink-muted); }
 .results .found { max-height: none; }
 
+/* Play, the countdown, and the face-down board under them */
+.tile.down { color: transparent; }
+.gate {
+  position: absolute; inset: 0; z-index: 2;
+  display: grid; place-items: center;
+  border-radius: var(--r-keycap);
+  background: color-mix(in srgb, var(--surface-quiet) 45%, transparent);
+}
+.gate[hidden], .gate [hidden] { display: none; }
+.play-key { min-height: 56px; padding: 0 40px; font-size: 1.375rem; }
+.count {
+  width: 96px; height: 96px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--surface); box-shadow: 0 6px 0 var(--surface-lip);
+  font-family: var(--font-game); font-weight: 900; font-size: 3.25rem; color: var(--cobalt);
+  font-variant-numeric: tabular-nums;
+}
+.count.pop { animation: pop 260ms cubic-bezier(.34,1.56,.64,1); }
+/* The nudge: two touching tiles that start a real word breathe in gold, one after the other. */
+.tile.hinted { animation: hintPulse 1.6s ease-in-out infinite; }
+.tile.hinted-2 { animation-delay: .4s; }
+@keyframes hintPulse {
+  0%, 100% { background: var(--tile); transform: none; }
+  50% { background: color-mix(in srgb, var(--gold) 55%, var(--tile)); transform: translateY(-2px) scale(1.04); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 120ms !important; }
   .key:active { transform: none; }
+  .tile.hinted { animation: none; background: color-mix(in srgb, var(--gold) 45%, var(--tile)); }
 }
 </style>
 </head>
@@ -600,6 +627,10 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
       <div class="tracing" id="tracing" aria-hidden="true"><span class="hint">Drag across the letters</span></div>
       <div class="board" id="board" role="img" aria-label="A four by four board of letter tiles. Trace words with a finger or a mouse, or type them in the field below.">
         <svg class="path-svg" id="pathSvg" aria-hidden="true"></svg>
+        <div class="gate" id="gate">
+          <button type="button" class="key play-key" id="playBtn">Play</button>
+          <span class="count" id="count" aria-hidden="true" hidden>3</span>
+        </div>
       </div>
       <p class="sr-only" id="announce" aria-live="polite"></p>
       <div class="found" id="found" aria-label="Words found"></div>
@@ -1001,7 +1032,9 @@ const BRAND = "Meep";
 
   let boardIndex = Math.floor(Math.random() * BOARDS.length);
   let letters, valid, familiar, tiles = [];
-  let found, score, path, rects, endsAt, ticking, state, feedbackTimer, litTimer;
+  let found, score, path, rects, endsAt, ticking, state, feedbackTimer, litTimer, hintTimer, beats = [];
+  const gate = $("gate"), playBtn = $("playBtn"), countEl = $("count");
+  const COUNT_FROM = 3, BEAT_MS = 800, HINT_AFTER_MS = 4000;
 
   function setup() {
     const b = BOARDS[boardIndex];
@@ -1018,25 +1051,69 @@ const BRAND = "Meep";
     reset();
   }
 
+  // Before a round the tiles lie face down under Play, so nobody reads the board for free.
   function reset() {
     clearInterval(ticking); ticking = null;
+    beats.forEach(clearTimeout); beats = [];
+    stopHint();
     found = []; score = 0; path = []; state = "ready";
     foundEl.innerHTML = "";
     scoreEl.textContent = "0";
     timerEl.textContent = fmtTime(ROUND_SECONDS);
     timerEl.classList.remove("breathe");
     results.hidden = true;
-    footNote.textContent = "Trace a word to start the clock.";
+    footNote.textContent = "Tap Play to start a one-minute round.";
     clearTrace();
-    showHint();
+    tiles.forEach(t => t.classList.add("down"));
+    tracingEl.innerHTML = "";
+    gate.hidden = false; playBtn.hidden = false; countEl.hidden = true;
+  }
+
+  // Play, then 3, 2, 1, then the letters turn over and the clock starts.
+  function countdown() {
+    if (state !== "ready") return;
+    state = "counting";
+    playBtn.hidden = true; countEl.hidden = false;
+    footNote.textContent = "Get ready.";
+    for (let k = 0; k < COUNT_FROM; k++) beats.push(setTimeout(() => {
+      countEl.textContent = String(COUNT_FROM - k);
+      countEl.classList.remove("pop"); void countEl.offsetWidth; countEl.classList.add("pop");
+      if (k === 0) announce.textContent = "Starting in 3.";
+    }, k * BEAT_MS));
+    beats.push(setTimeout(startClock, COUNT_FROM * BEAT_MS));
   }
 
   function startClock() {
-    if (state !== "ready") return;
+    beats = [];
     state = "playing";
+    gate.hidden = true;
+    tiles.forEach(t => t.classList.remove("down"));
     endsAt = performance.now() + ROUND_SECONDS * 1000;
     footNote.textContent = (valid.size) + " words on this board.";
+    announce.textContent = "Go. One minute.";
+    showHint();
+    armHint();
     ticking = setInterval(tick, 200);
+  }
+
+  // A player who has not found a word a few seconds in sees two touching tiles that start a
+  // real word breathe softly, until they touch the board.
+  function armHint() {
+    clearTimeout(hintTimer);
+    if (state === "playing" && !found.length) hintTimer = setTimeout(showTileHint, HINT_AFTER_MS);
+  }
+  function showTileHint() {
+    if (state !== "playing" || found.length || tracing) return;
+    const pool = familiar.filter(w => w.length >= 4 && w.length <= 5);
+    const word = pool[Math.floor(Math.random() * pool.length)] || familiar[0];
+    const p = word && findPath(word);
+    if (!p) return;
+    tiles[p[0]].classList.add("hinted");
+    tiles[p[1]].classList.add("hinted", "hinted-2");
+  }
+  function stopHint() {
+    clearTimeout(hintTimer);
+    tiles.forEach(t => t.classList.remove("hinted", "hinted-2"));
   }
   function tick() {
     const left = Math.max(0, Math.ceil((endsAt - performance.now()) / 1000));
@@ -1112,13 +1189,12 @@ const BRAND = "Meep";
 
   // --- playing a word ---
   function play(word, tracedPath) {
-    if (state === "done") return;
+    if (state !== "playing") return;
     word = word.toLowerCase();
     if (word.length < MIN_LEN) {
       if (word.length) feedback('<span class="meh">Too short</span>', 900);
-      return clearTrace();
+      clearTrace(); return armHint();
     }
-    startClock();
     path = tracedPath || findPath(word) || [];
     if (found.includes(word)) {
       announce.textContent = word.toUpperCase() + ", already found.";
@@ -1129,10 +1205,11 @@ const BRAND = "Meep";
       announce.textContent = word.toUpperCase() + " is not a word on this board.";
       feedback('<span class="meh">Not a word</span>', 900);
       if (!reduce.matches) { boardEl.classList.remove("shake"); void boardEl.offsetWidth; boardEl.classList.add("shake"); }
-      return clearTrace();
+      clearTrace(); return armHint();
     }
     const p = points(word);
     found.push(word); score += p;
+    stopHint();
     scoreEl.textContent = fmtNum(score);
     if (!reduce.matches) { scoreEl.classList.remove("bump"); void scoreEl.offsetWidth; scoreEl.classList.add("bump"); }
     const chip = document.createElement("span");
@@ -1170,8 +1247,9 @@ const BRAND = "Meep";
     if (state !== "playing") return;
     state = "done";
     clearInterval(ticking); ticking = null;
+    stopHint();
     timerEl.textContent = "0:00"; timerEl.classList.remove("breathe");
-    clearTrace(); showHint();
+    clearTrace(); tracingEl.innerHTML = "";
     $("resScore").textContent = fmtNum(score);
     $("resWords").textContent = (found.length === 1 ? "1 word" : found.length + " words") + ", of " + valid.size + " on the board";
     const missed = familiar.filter(w => !found.includes(w))
@@ -1191,8 +1269,9 @@ const BRAND = "Meep";
   // --- input ---
   let tracing = false;
   boardEl.addEventListener("pointerdown", e => {
-    if (state === "done" || e.button > 0) return;
+    if (state !== "playing" || e.button > 0) return;
     e.preventDefault();
+    stopHint();
     measure();
     tracing = true;
     try { boardEl.setPointerCapture(e.pointerId); } catch (_) {}
@@ -1211,7 +1290,7 @@ const BRAND = "Meep";
     play(traced.map(k => letters[k]).join(""), traced);
   }
   boardEl.addEventListener("pointerup", lift);
-  boardEl.addEventListener("pointercancel", () => { tracing = false; clearTrace(); showHint(); });
+  boardEl.addEventListener("pointercancel", () => { tracing = false; clearTrace(); showHint(); armHint(); });
   boardEl.addEventListener("contextmenu", e => e.preventDefault());
 
   $("typeForm").addEventListener("submit", e => {
@@ -1223,7 +1302,9 @@ const BRAND = "Meep";
   });
   $("newBoard").addEventListener("click", newBoard);
   $("resNew").addEventListener("click", newBoard);
-  $("playAgain").addEventListener("click", reset);
+  playBtn.addEventListener("click", countdown);
+  // Play again skips the Play button: the player has just asked to play.
+  $("playAgain").addEventListener("click", () => { reset(); countdown(); });
   window.addEventListener("resize", () => { if (path.length) { measure(); drawTrace(); } });
 
   setup();
