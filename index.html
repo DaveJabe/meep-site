@@ -73,6 +73,8 @@
   /* spacing scale */
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
   --lip: 5px;
+  /* the green a word just taken lights, the same in both looks */
+  --accept: #43A04F; --accept-lip: #2C6E35;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -300,14 +302,6 @@ p { margin: 0; }
 .chip.pop { animation: pop 260ms cubic-bezier(.34,1.56,.64,1); }
 .chip.placeholder { background: transparent; box-shadow: inset 0 0 0 2px var(--hairline); color: var(--ink-muted); }
 
-.times-up {
-  position: absolute; inset: 0; z-index: 3;
-  display: grid; place-items: center;
-  background: var(--scrim);
-  border-radius: var(--r-hero);
-  font-family: var(--font-game); font-weight: 900; font-size: 3rem; color: var(--ink);
-}
-.times-up span { animation: pop 220ms cubic-bezier(.34,1.56,.64,1); }
 
 @keyframes pop { 0% { transform: scale(.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes bump { 0%,100% { transform: scale(1); } 50% { transform: scale(1.14); } }
@@ -513,6 +507,53 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
 .foot nav span { color: var(--ink-muted); }
 .foot small { color: var(--ink-muted); font-size: .8125rem; }
 
+/* --- the playable board --- */
+.board { touch-action: none; -webkit-user-select: none; user-select: none; cursor: pointer; }
+.tile.ok { transform: translateY(-3px) scale(1.03); background: var(--accept); color: #1F3D24; box-shadow: 0 7px 0 var(--accept-lip); }
+.tile.dup { background: var(--surface-quiet); color: var(--ink-muted); }
+.board.shake { animation: shake 260ms ease-in-out; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.path-svg polyline.ok { stroke: var(--accept); }
+.path-svg polyline.dup { stroke: var(--hairline); }
+.tracing {
+  min-height: 40px; display: grid; place-items: center;
+  font-family: var(--font-game); font-weight: 900; font-size: 1.5rem; letter-spacing: .06em;
+  color: var(--ink);
+}
+.tracing .hint { font-size: .9375rem; font-weight: 800; letter-spacing: 0; color: var(--ink-muted); }
+.tracing .good { color: var(--leaf); }
+.tracing .meh { color: var(--ink-muted); font-size: 1.0625rem; letter-spacing: 0; }
+.found { max-height: 112px; overflow-y: auto; }
+.demo-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); font-size: .875rem; color: var(--ink-muted); }
+.link-btn {
+  min-height: 44px; padding: 0 var(--s2); margin-right: calc(var(--s2) * -1);
+  background: none; border: 0; cursor: pointer;
+  font: inherit; font-family: var(--font-game); font-weight: 800; font-size: .9375rem; color: var(--cobalt);
+}
+.link-btn:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* The typed fallback, for a keyboard or a screen reader: out of sight until it has focus. */
+.type-word { display: flex; gap: var(--s2); align-items: center; font-size: .875rem; }
+.type-word:not(:focus-within) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.type-word input {
+  flex: 1; min-width: 0; min-height: 40px; padding: 0 var(--s3);
+  border-radius: var(--r-chip); border: 2px solid var(--hairline); background: var(--surface); color: var(--ink);
+  font-family: var(--font-game); font-weight: 800; font-size: 1rem; text-transform: uppercase;
+}
+.results {
+  position: absolute; inset: 0; z-index: 3;
+  display: grid; align-content: center; gap: var(--s4);
+  padding: var(--s5);
+  background: var(--surface);
+  border-radius: var(--r-hero);
+  overflow-y: auto;
+}
+.results[hidden] { display: none; }
+.results-title { font-family: var(--font-game); font-weight: 900; font-size: 2.5rem; line-height: 1; animation: pop 220ms cubic-bezier(.34,1.56,.64,1); }
+.results-score { display: grid; gap: var(--s1); }
+.results-score .num { font-family: var(--font-game); font-weight: 900; font-size: 2.25rem; line-height: 1; color: var(--cobalt); font-variant-numeric: tabular-nums; }
+.results-score span:last-child { color: var(--ink-muted); }
+.results .found { max-height: none; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 120ms !important; }
   .key:active { transform: none; }
@@ -552,15 +593,37 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
     </div>
 
     <div class="board-card" id="demo">
-      <p class="sr-only">An example round: a four by four board of letter tiles where the words words, trace, clock and rate are traced in gold, one after another.</p>
-      <div class="hud" aria-hidden="true">
-        <div><div class="label">Time</div><span class="num timer" id="timer">0:15</span></div>
+      <div class="hud">
+        <div><div class="label">Time</div><span class="num timer" id="timer">1:00</span></div>
         <div class="score-wrap"><div class="label">Score</div><span class="num score" id="score">0</span></div>
       </div>
-      <div class="board" id="board" aria-hidden="true">
-        <svg class="path-svg" id="pathSvg"></svg>
+      <div class="tracing" id="tracing" aria-hidden="true"><span class="hint">Drag across the letters</span></div>
+      <div class="board" id="board" role="img" aria-label="A four by four board of letter tiles. Trace words with a finger or a mouse, or type them in the field below.">
+        <svg class="path-svg" id="pathSvg" aria-hidden="true"></svg>
       </div>
-      <div class="found" id="found" aria-hidden="true"></div>
+      <p class="sr-only" id="announce" aria-live="polite"></p>
+      <div class="found" id="found" aria-label="Words found"></div>
+      <div class="demo-foot">
+        <span id="footNote">Trace a word to start the clock.</span>
+        <button type="button" class="link-btn" id="newBoard">New board</button>
+      </div>
+      <form class="type-word" id="typeForm" autocomplete="off">
+        <label for="typeInput">Or type a word</label>
+        <input id="typeInput" type="text" inputmode="text" autocapitalize="characters" spellcheck="false" maxlength="16">
+        <button type="submit" class="link-btn">Play</button>
+      </form>
+      <div class="results" id="results" hidden>
+        <p class="results-title">Time!</p>
+        <div class="results-score"><span class="num" id="resScore">0</span><span id="resWords"></span></div>
+        <div class="stack" id="resMissedWrap">
+          <p class="eyebrow">Words you missed</p>
+          <div class="found" id="resMissed"></div>
+        </div>
+        <div class="cta-row">
+          <button type="button" class="key" id="playAgain">Play again</button>
+          <button type="button" class="link-btn" id="resNew">New board</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -911,140 +974,259 @@ const BRAND = "Meep";
   });
 })();
 
-/* The one orchestrated moment: a 4x4 board tracing words in gold. */
+/* The playable board. A small slice of the real game: a 4x4 board, a minute on the clock,
+   Meep's own dictionary and scoring. Each board below carries every word Meep's dictionary
+   (enable v10) finds on it, and the familiar ones the results suggest as missed.
+   Made by a script from the app's lexicon files; the words are not hand-picked. */
 (function () {
-  const GRID = ["WORD", "ETAS", "BRCL", "KCOE"];
-  const WORDS = [
-    { w: "WORDS", p: [[0,0],[0,1],[0,2],[0,3],[1,3]] },
-    { w: "TRACE", p: [[1,1],[2,1],[1,2],[2,2],[3,3]] },
-    { w: "CLOCK", p: [[2,2],[2,3],[3,2],[3,1],[3,0]] },
-    { w: "RATE",  p: [[0,2],[1,2],[1,1],[1,0]] }
-  ];
-  const pts = w => w.length * 10 - 20;   // illustrative only
-  const board = document.getElementById("board");
-  const svg = document.getElementById("pathSvg");
-  const found = document.getElementById("found");
-  const scoreEl = document.getElementById("score");
-  const timerEl = document.getElementById("timer");
-  const card = document.getElementById("demo");
-  const NS = "http://www.w3.org/2000/svg";
-  const tiles = [];
-  GRID.forEach((row, r) => [...row].forEach((ch, c) => {
-    const t = document.createElement("div");
-    t.className = "tile"; t.textContent = ch;
-    board.appendChild(t); tiles.push(t);
-  }));
-  const tileAt = (r, c) => tiles[r * 4 + c];
+  const BOARDS = [{"letters":"RNCRYRBIOSMIDALP","words":"ado adorn ads adsorb alibi alms alp also ambry amir amp brim brims broad broads brr crib cribs crimp cry dam damp dams dorm dorms dorsa dorsal dory dos imp impi lad lads lam lamb lambs lamp lams lib libri limb limbic limbs limp lip mad mads mas micro micros mil mils orb orbs orc plasm plasmic rib ribs rim rims road roads roam roams rod rods rosy sad salmi slam slim slip sod soda sorb sorbic sorry soy sync","familiar":"ado adorn ads adsorb alibi alms alp also amir amp brim brims broad broads brr crib cribs crimp cry dam damp dams dorm dorms dorsal dory dos imp lad lads lam lamb lambs lamp lams lib limb limbs limp lip mad mads mas micro micros mil mils orb orbs orc rib ribs rim rims road roads roam roams rod rods rosy sad slam slim slip sod soda sorry soy sync"},{"letters":"NSASVRTDSITAECLD","words":"ads alit aril arise art arts astatic astir astrict attar attars attic attics ceil cis clad clads dad dada dadas dads daric darics darn darns dart darts data dataries eclat eclats ice ices its lad lads latices lats lattice lattices lice lie lies lira liras lit litas rad rads rat rats rice rices rictal rise sad sari saris sat sati sect sic silt sir sirs sit sitar sitars sits star stars start static statice statices statics sties stilt stir stirs strict tad tads talc tali tar tarn tarns tars tarsi tart tat tatar tatars tats tic tics tie ties til tilt trad trice trices triclad triclads tries trisect vice vices vie vies vise vita vital vitta","familiar":"ads alit arise art arts astir attar attars attic attics cis clad clads dad dads darn darns dart darts data eclat eclats ice ices its lad lads latices lats lattice lattices lice lie lies lira liras lit rad rads rat rats rice rices rise sad sari saris sat sect sic silt sir sirs sit sitar sitars sits star stars start static statics sties stilt stir stirs strict tad tads talc tali tar tarn tarns tars tarsi tart tat tats tic tics tie ties til tilt trad trice trices tries trisect vice vices vie vies vise vita vital"},{"letters":"TNUEGRNNHSOLOAEI","words":"ash enol ens eon eons euro euros gnu grunt has hose hosel ilea ion ions lea leas leash lei leone lie lies lion lions lone lorn lose neuron neurons noel noes noil none nor nose nosh nun nuns nurse ohs oil ole oles one rho rhos roe roes roil role roles rose rue run rune rung rungs runs runt sea snort soil sol sole soli son sone sort true unleash urn urns","familiar":"ash ens eon eons euro euros gnu grunt has hose ilea ion ions lea leas leash lei lie lies lion lions lone lorn lose neuron neurons noel noes none nor nose nosh nun nuns nurse ohs oil ole oles one rho rhos roe roes roil role roles rose rue run rune rung rungs runs runt sea snort soil sol sole soli son sort true unleash urn urns"},{"letters":"STRBHLTEIRAGLSCE","words":"ace age alter arc arcs aril arils art ate bear bears beat beg begat berth berths bet beta betas cage cager car carl carls cars cart carte carter cat cate cater crag crate crater eager ear earl earls ears eat eater ecarte eta etas gal gals gar gars garter gas gate gear gears get hila hilar hilt hilts his irate irater lac lace lag lager lari laris late later lilac lilacs lilt lilts lira liras race rag rage rat rate rater real reals rear rears regal regear regears retrace retral sac sag sage sager salt salter salts sari sat sate scag scar scat scrag shirt silage silt silts sir slag slat slate slater tace tag tali tar tars tarsi tea teal teals tear tears teas this trace treat tret","familiar":"ace age alter arc arcs art ate bear bears beat beg begat berth berths bet beta betas cage car cars cart carter cat cater crag crate crater eager ear earl earls ears eat eater eta etas gal gals gar gars garter gas gate gear gears get hilt hilts his irate irater lac lace lag lager late later lilac lilacs lilt lilts lira liras race rag rage rat rate rater real reals rear rears regal retrace sac sag sage sager salt salter salts sari sat sate scar scat scrag shirt silage silt silts sir slag slat slate tag tali tar tars tarsi tea teal teals tear tears teas this trace treat"},{"letters":"RMORNTSAFLUIELRT","words":"air aisle aurist autism auto autos elf ell ells fell fells felt felts flu flutist isle ism left lefts lust lutist mora moras most mot mots oar oars oms roast rot rots rule rust rustle rut ruts sault sir sit slur soar sot stoa stull sturt suit tom toms tor tora toras tors truism trull trulls trust trustor tulle tut tutor tutors tuts","familiar":"air aisle autism auto autos elf ell ells fell fells felt felts flu flutist isle ism left lefts lust most mot mots oar oars oms roast rot rots rule rust rustle rut ruts sir sit slur soar sot suit tom toms tor tors truism trust tulle tut tutor tutors tuts"},{"letters":"MWSROOUTEFSISALP","words":"alist alit alp alps also asp east easts fast fasts feal feast feasts flip flips flit flits foe foes four fours fur furs fusil its lase last lasts lip lips lisp list lists lit moo moos most mosts mow mows our ours oust ousts out outs pilaf pilafs pis piso pit pits rust rusts rut ruts safe safes sea seal seals seas sip sit sits situs slip slit slits sofa sofas sos sou sour sours sous sow sows spit spits split splits suit suits til tip tips tufa woe woes woo woof woofs woos wurst wursts","familiar":"alit alp alps also asp east easts fast fasts feast feasts flip flips flit flits foe foes four fours fur furs its last lasts lip lips lisp list lists lit moo moos most mosts mow mows our ours oust ousts out outs pilaf pilafs pis piso pit pits rust rusts rut ruts safe safes sea seal seals seas sip sit sits slip slit slits sofa sofas sos sou sour sours sous sow sows spit spits split splits suit suits til tip tips woe woes woo woof woofs woos wurst wursts"},{"letters":"RELCELVCDAYVEGMO","words":"age aged agedly alder ale alee all allee amyl aver cyma dale dam day deal dealer deer delay dele dell delve delver eave edge edgy eel egad elder ell ere evade evader gad gal gale gall gamy gave gavel gaveled gay gym gyve lad lade lader lag lam lav lave laver lay lea lead leave leaver leavy led ledge lee leer leva levy mad made madly mage male mall may mayo read real ream red reed reel relay rely rev vale veer vela veld voyage voyaged yam","familiar":"age aged alder ale all aver dale dam day deal dealer deer delay dell delve delver eave edge edgy eel egad elder ell ere evade evader gad gal gale gall gamy gave gavel gaveled gay gym gyve lad lade lag lam lav lave lay lea lead leave leaver leavy led ledge lee leer levy mad made madly mage male mall may mayo read real ream red reed reel relay rely rev vale veer vela veld voyage voyaged yam"}];
+  const N = 4, ROUND_SECONDS = 60, MIN_LEN = 3;
+  const HOUSE = new Set(["meep", "meeps", "meeped", "meeping", "meeper"]);
+  // Scoring version 3, Balance.swift: the length ladder, plus 100 for a house word.
+  function points(w) {
+    const L = w.length;
+    const ladder = L < 3 ? 0 : L === 3 ? 100 : L === 4 ? 400 : L === 5 ? 800 : L === 6 ? 1400
+      : L === 7 ? 1800 : L === 8 ? 2200 : L === 9 ? 2800 : L === 10 ? 3500 : 3500 + 900 * (L - 10);
+    return ladder + (HOUSE.has(w) ? 100 : 0);
+  }
+  const fmtNum = n => n.toLocaleString("en-US");
+  const fmtTime = s => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+
+  const $ = id => document.getElementById(id);
+  const card = $("demo"), boardEl = $("board"), svg = $("pathSvg"), foundEl = $("found");
+  const scoreEl = $("score"), timerEl = $("timer"), tracingEl = $("tracing"), announce = $("announce");
+  const footNote = $("footNote"), results = $("results");
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const NS = "http://www.w3.org/2000/svg";
 
-  function center(r, c) {
-    const b = board.getBoundingClientRect(), t = tileAt(r, c).getBoundingClientRect();
-    return [t.left - b.left + t.width / 2, t.top - b.top + t.height / 2];
-  }
-  function drawPath(path, animate, ms) {
-    const b = board.getBoundingClientRect();
-    svg.setAttribute("viewBox", "0 0 " + b.width + " " + b.height);
-    svg.innerHTML = "";
-    const pl = document.createElementNS(NS, "polyline");
-    pl.setAttribute("points", path.map(([r, c]) => center(r, c).join(",")).join(" "));
-    pl.setAttribute("pathLength", "1");
-    const sw = Math.max(10, tileAt(0,0).getBoundingClientRect().width * 0.22);
-    pl.style.strokeWidth = sw;
-    if (animate) {
-      pl.style.strokeDasharray = "1"; pl.style.strokeDashoffset = "1";
-      pl.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: ms, easing: "linear", fill: "forwards" });
-    }
-    svg.appendChild(pl);
-    return pl;
-  }
-  function addChip(w, animate) {
-    const ph = found.querySelector(".placeholder"); if (ph) ph.remove();
-    const chip = document.createElement("span");
-    chip.className = "chip" + (animate ? " pop" : "");
-    chip.innerHTML = w + ' <span class="pts">+' + pts(w) + "</span>";
-    found.appendChild(chip);
-  }
-  function placeholder() {
-    found.innerHTML = '<span class="chip placeholder">Trace a word</span>';
-  }
-  function fmt(s) { return "0:" + String(s).padStart(2, "0"); }
+  let boardIndex = Math.floor(Math.random() * BOARDS.length);
+  let letters, valid, familiar, tiles = [];
+  let found, score, path, rects, endsAt, ticking, state, feedbackTimer, litTimer;
 
-  function showStatic() {
-    tiles.forEach(t => t.classList.remove("on"));
-    found.innerHTML = "";
-    let total = 0;
-    WORDS.forEach(x => { addChip(x.w, false); total += pts(x.w); });
-    scoreEl.textContent = total;
-    timerEl.textContent = fmt(15);
-    timerEl.classList.remove("breathe");
-    const last = WORDS[1];
-    last.p.forEach(([r, c]) => tileAt(r, c).classList.add("on"));
-    drawPath(last.p, false);
-  }
-
-  let timers = [];
-  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
-  function clearAll() { timers.forEach(clearTimeout); timers = []; }
-
-  function round() {
-    clearAll();
-    card.querySelectorAll(".times-up").forEach(n => n.remove());
-    tiles.forEach(t => t.classList.remove("on"));
-    svg.innerHTML = ""; placeholder();
-    let score = 0, secs = 15;
-    scoreEl.textContent = 0; timerEl.textContent = fmt(secs); timerEl.classList.remove("breathe");
-    for (let i = 1; i <= 15; i++) later(() => {
-      secs = 15 - i; timerEl.textContent = fmt(secs);
-      if (secs <= 10 && secs > 0) timerEl.classList.add("breathe");
-      if (secs === 0) { timerEl.classList.remove("breathe"); timesUp(); }
-    }, i * 1000);
-
-    let at = 700;
-    WORDS.forEach(({ w, p }) => {
-      const step = 150, traceMs = step * (p.length - 1);
-      later(() => {
-        drawPath(p, true, traceMs);
-        p.forEach(([r, c], k) => later(() => tileAt(r, c).classList.add("on"), k * step));
-      }, at);
-      later(() => {
-        addChip(w, true);
-        score += pts(w); scoreEl.textContent = score;
-        scoreEl.classList.remove("bump"); void scoreEl.offsetWidth; scoreEl.classList.add("bump");
-        const f = document.createElement("span");
-        f.className = "float-pts"; f.textContent = "+" + pts(w);
-        scoreEl.parentElement.appendChild(f); later(() => f.remove(), 820);
-      }, at + traceMs + 120);
-      later(() => {
-        const pl = svg.querySelector("polyline"); if (pl) pl.style.opacity = "0";
-        tiles.forEach(t => t.classList.remove("on"));
-      }, at + traceMs + 900);
-      at += traceMs + 1900;
+  function setup() {
+    const b = BOARDS[boardIndex];
+    letters = [...b.letters];
+    valid = new Set(b.words.split(" "));
+    familiar = b.familiar.split(" ");
+    tiles.forEach(t => t.remove());
+    tiles = letters.map(ch => {
+      const t = document.createElement("div");
+      t.className = "tile"; t.textContent = ch;
+      boardEl.appendChild(t);
+      return t;
     });
-  }
-  function timesUp() {
-    const o = document.createElement("div");
-    o.className = "times-up"; o.innerHTML = "<span>Time!</span>";
-    card.appendChild(o);
-    later(round, 850 + 1400);
+    reset();
   }
 
-  function start() {
-    clearAll();
-    card.querySelectorAll(".times-up").forEach(n => n.remove());
-    if (reduce.matches) showStatic(); else round();
+  function reset() {
+    clearInterval(ticking); ticking = null;
+    found = []; score = 0; path = []; state = "ready";
+    foundEl.innerHTML = "";
+    scoreEl.textContent = "0";
+    timerEl.textContent = fmtTime(ROUND_SECONDS);
+    timerEl.classList.remove("breathe");
+    results.hidden = true;
+    footNote.textContent = "Trace a word to start the clock.";
+    clearTrace();
+    showHint();
   }
-  reduce.addEventListener?.("change", start);
-  let rz; window.addEventListener("resize", () => {
-    clearTimeout(rz);
-    rz = setTimeout(() => {
-      const on = tiles.map((t, i) => t.classList.contains("on") ? i : -1).filter(i => i >= 0);
-      if (svg.firstChild && on.length) {
-        const w = WORDS.find(x => x.p.length === on.length && x.p.every(([r, c]) => on.includes(r * 4 + c)));
-        if (w) drawPath(w.p, false);
+
+  function startClock() {
+    if (state !== "ready") return;
+    state = "playing";
+    endsAt = performance.now() + ROUND_SECONDS * 1000;
+    footNote.textContent = (valid.size) + " words on this board.";
+    ticking = setInterval(tick, 200);
+  }
+  function tick() {
+    const left = Math.max(0, Math.ceil((endsAt - performance.now()) / 1000));
+    timerEl.textContent = fmtTime(left);
+    timerEl.classList.toggle("breathe", left <= 10 && left > 0);
+    if (left === 0) finish();
+  }
+
+  // --- tracing ---
+  function measure() {
+    const b = boardEl.getBoundingClientRect();
+    rects = tiles.map(t => {
+      const r = t.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+    });
+    svg.setAttribute("viewBox", "0 0 " + b.width + " " + b.height);
+  }
+  // The first tile takes a touch anywhere on it; after that, only near a tile's middle,
+  // so a diagonal does not catch the corner of a neighbour.
+  function tileAt(x, y, loose) {
+    for (let i = 0; i < rects.length; i++) {
+      const r = rects[i];
+      if (loose) { if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return i; }
+      else if (Math.hypot(x - r.x, y - r.y) <= r.w * 0.42) return i;
+    }
+    return -1;
+  }
+  const adjacent = (a, b) => a !== b && Math.abs((a / N | 0) - (b / N | 0)) <= 1 && Math.abs(a % N - b % N) <= 1;
+
+  function extend(i) {
+    if (i < 0) return;
+    if (!path.length) { path.push(i); return drawTrace(); }
+    const last = path[path.length - 1];
+    if (i === last) return;
+    if (path.length >= 2 && i === path[path.length - 2]) { path.pop(); return drawTrace(); }
+    if (!path.includes(i) && adjacent(last, i)) { path.push(i); drawTrace(); }
+  }
+
+  function drawTrace(kind) {
+    tiles.forEach((t, k) => {
+      t.classList.remove("on", "ok", "dup");
+      if (path.includes(k)) t.classList.add(kind || "on");
+    });
+    svg.innerHTML = "";
+    if (path.length) {
+      const b = boardEl.getBoundingClientRect();
+      const pl = document.createElementNS(NS, "polyline");
+      pl.setAttribute("points", path.map(k => (rects[k].x - b.left) + "," + (rects[k].y - b.top)).join(" "));
+      pl.style.strokeWidth = Math.max(10, rects[0].w * 0.22);
+      if (kind) pl.classList.add(kind);
+      svg.appendChild(pl);
+    }
+    if (!kind) {
+      clearTimeout(feedbackTimer);
+      tracingEl.textContent = path.map(k => letters[k]).join("");
+      if (!path.length) showHint();
+    }
+  }
+  function clearTrace() {
+    path = [];
+    tiles.forEach(t => t.classList.remove("on", "ok", "dup"));
+    svg.innerHTML = "";
+  }
+  function showHint() {
+    if (state === "playing" && found.length) { tracingEl.innerHTML = ""; return; }
+    tracingEl.innerHTML = '<span class="hint">Drag across the letters</span>';
+  }
+  function feedback(html, ms) {
+    clearTimeout(feedbackTimer);
+    tracingEl.innerHTML = html;
+    feedbackTimer = setTimeout(showHint, ms);
+  }
+
+  // --- playing a word ---
+  function play(word, tracedPath) {
+    if (state === "done") return;
+    word = word.toLowerCase();
+    if (word.length < MIN_LEN) {
+      if (word.length) feedback('<span class="meh">Too short</span>', 900);
+      return clearTrace();
+    }
+    startClock();
+    path = tracedPath || findPath(word) || [];
+    if (found.includes(word)) {
+      announce.textContent = word.toUpperCase() + ", already found.";
+      feedback('<span class="meh">Already found</span>', 900);
+      return flash("dup");
+    }
+    if (!valid.has(word) || !path.length) {
+      announce.textContent = word.toUpperCase() + " is not a word on this board.";
+      feedback('<span class="meh">Not a word</span>', 900);
+      if (!reduce.matches) { boardEl.classList.remove("shake"); void boardEl.offsetWidth; boardEl.classList.add("shake"); }
+      return clearTrace();
+    }
+    const p = points(word);
+    found.push(word); score += p;
+    scoreEl.textContent = fmtNum(score);
+    if (!reduce.matches) { scoreEl.classList.remove("bump"); void scoreEl.offsetWidth; scoreEl.classList.add("bump"); }
+    const chip = document.createElement("span");
+    chip.className = "chip" + (reduce.matches ? "" : " pop");
+    chip.innerHTML = word.toUpperCase() + ' <span class="pts">+' + fmtNum(p) + "</span>";
+    foundEl.prepend(chip);
+    announce.textContent = word.toUpperCase() + ", " + fmtNum(p) + " points. Score " + fmtNum(score) + ".";
+    feedback('<span class="good">' + word.toUpperCase() + " +" + fmtNum(p) + "</span>", 900);
+    flash("ok");
+  }
+  // The word just taken lights green for a moment, as on the phone.
+  function flash(kind) {
+    clearTimeout(litTimer);
+    if (!path.length) return;
+    drawTrace(kind);
+    litTimer = setTimeout(clearTrace, reduce.matches ? 400 : 450);
+  }
+  // A typed word still has to be traceable: find one path that spells it.
+  function findPath(word) {
+    const up = word.toUpperCase();
+    function dfs(i, k, used) {
+      if (letters[i] !== up[k]) return null;
+      used = used.concat(i);
+      if (k === up.length - 1) return used;
+      for (let j = 0; j < N * N; j++) {
+        if (!used.includes(j) && adjacent(i, j)) { const r = dfs(j, k + 1, used); if (r) return r; }
       }
-    }, 120);
+      return null;
+    }
+    for (let i = 0; i < N * N; i++) { const r = dfs(i, 0, []); if (r) return r; }
+    return null;
+  }
+
+  function finish() {
+    if (state !== "playing") return;
+    state = "done";
+    clearInterval(ticking); ticking = null;
+    timerEl.textContent = "0:00"; timerEl.classList.remove("breathe");
+    clearTrace(); showHint();
+    $("resScore").textContent = fmtNum(score);
+    $("resWords").textContent = (found.length === 1 ? "1 word" : found.length + " words") + ", of " + valid.size + " on the board";
+    const missed = familiar.filter(w => !found.includes(w))
+      .sort((a, b) => b.length - a.length || a.localeCompare(b)).slice(0, 6);
+    $("resMissed").innerHTML = missed.map(w => '<span class="chip">' + w.toUpperCase() + "</span>").join("");
+    $("resMissedWrap").hidden = !missed.length;
+    results.hidden = false;
+    announce.textContent = "Time. Score " + fmtNum(score) + ", " + found.length + " words.";
+    $("playAgain").focus({ preventScroll: true });
+  }
+
+  function newBoard() {
+    boardIndex = (boardIndex + 1) % BOARDS.length;
+    setup();
+  }
+
+  // --- input ---
+  let tracing = false;
+  boardEl.addEventListener("pointerdown", e => {
+    if (state === "done" || e.button > 0) return;
+    e.preventDefault();
+    measure();
+    tracing = true;
+    try { boardEl.setPointerCapture(e.pointerId); } catch (_) {}
+    clearTimeout(litTimer); clearTrace();
+    extend(tileAt(e.clientX, e.clientY, true));
   });
-  start();
+  boardEl.addEventListener("pointermove", e => {
+    if (!tracing) return;
+    const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for (const ev of (events.length ? events : [e])) extend(tileAt(ev.clientX, ev.clientY, path.length === 0));
+  });
+  function lift() {
+    if (!tracing) return;
+    tracing = false;
+    const traced = path.slice();
+    play(traced.map(k => letters[k]).join(""), traced);
+  }
+  boardEl.addEventListener("pointerup", lift);
+  boardEl.addEventListener("pointercancel", () => { tracing = false; clearTrace(); showHint(); });
+  boardEl.addEventListener("contextmenu", e => e.preventDefault());
+
+  $("typeForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const input = $("typeInput");
+    const w = input.value.replace(/[^a-z]/gi, "");
+    input.value = "";
+    if (w) play(w, null);
+  });
+  $("newBoard").addEventListener("click", newBoard);
+  $("resNew").addEventListener("click", newBoard);
+  $("playAgain").addEventListener("click", reset);
+  window.addEventListener("resize", () => { if (path.length) { measure(); drawTrace(); } });
+
+  setup();
 })();
 </script>
 
