@@ -524,11 +524,13 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
 .tracing .hint { font-size: .9375rem; font-weight: 800; letter-spacing: 0; color: var(--ink-muted); }
 .tracing .good { color: var(--leaf); }
 .tracing .meh { color: var(--ink-muted); font-size: 1.0625rem; letter-spacing: 0; }
-.found { max-height: 112px; overflow-y: auto; }
-.demo-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); font-size: .875rem; color: var(--ink-muted); }
+/* The found words keep a fixed two-row strip, newest first, and scroll inside it, so the card
+   (and the page under it) never grows as words arrive. */
+#found { height: 72px; min-height: 0; overflow-y: auto; scrollbar-width: thin; overscroll-behavior: contain; }
+.demo-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); min-height: 48px; font-size: .875rem; line-height: 1.4; color: var(--ink-muted); }
 .link-btn {
   min-height: 44px; padding: 0 var(--s2); margin-right: calc(var(--s2) * -1);
-  background: none; border: 0; cursor: pointer;
+  background: none; border: 0; cursor: pointer; white-space: nowrap; flex: none;
   font: inherit; font-family: var(--font-game); font-weight: 800; font-size: .9375rem; color: var(--cobalt);
 }
 .link-btn:hover { text-decoration: underline; text-underline-offset: 3px; }
@@ -553,7 +555,6 @@ footer { border-top: 1px solid var(--hairline); margin-top: var(--s5); }
 .results-score { display: grid; gap: var(--s1); }
 .results-score .num { font-family: var(--font-game); font-weight: 900; font-size: 2.25rem; line-height: 1; color: var(--cobalt); font-variant-numeric: tabular-nums; }
 .results-score span:last-child { color: var(--ink-muted); }
-.results .found { max-height: none; }
 
 /* Play, the countdown, and the face-down board under them */
 .tile.down { color: transparent; }
